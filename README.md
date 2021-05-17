@@ -1,0 +1,2 @@
+# mixSlide-jquery-plug-in
+ 

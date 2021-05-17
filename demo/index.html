@@ -1,0 +1,72 @@
+<!--
+	This web page shows you an example of mixSlide plug-in
+-->
+
+<!DOCTYPE HTML>
+<html lang="fr">
+	<head>
+		<title>MixSlide - demo</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<link rel="stylesheet"type="text/css"href="css/mixSlide.css"/>
+		<style type="text/css">
+			body{background:url(images/fond.jpg) fixed;}
+			h1{font:35px sans-serif;color:white;margin:5px;}
+			h1 i{color:orange;}
+			#diaporama{
+				width:80%;margin:auto;overflow:hidden;height:450px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1><i>Mix Slide</i><br> One of the best flexibles and automatics plugins</h1>
+		
+		<div id="diaporama"style="width:900px;height:550px;">
+			<div>
+				<img src="images/img1.jpg"/>
+				<p>Image 1</p>
+			</div>
+			<div>
+				<img src="images/img2.jpg"/>
+				<p>Image 2</p>
+			</div>
+			<div>
+				<img src="images/img3.jpg"/>
+				<p>Image 3</p>
+			</div>
+			<div>
+				<img src="images/img4.jpg"/>
+				<p>Image 4</p>
+			</div>
+			<div>
+				<img src="images/img5.jpg"/>
+				<p>Image 5</p>
+			</div>
+		</div>
+		<script language="javascript"src="js/jquery.js"></script>
+		<script language="javascript"src="js/jquery.vporel.mixSlide.js"></script>
+		<script language="javascript">
+			$(function(){
+				$('#diaporama').mixSlide({
+					thumbs:{
+						active:true,
+						position:'left'
+					},
+					controls:{
+						active:true,
+						position:"bottom"
+					},
+					easing:{
+						name:"slice",
+						direction:"vertical",
+						count:5
+					},
+					animation:{
+						delay:3,
+						speed:1.5
+					},
+					autoplay:true
+				});
+			});
+		</script>
+	</body>
+</html>
