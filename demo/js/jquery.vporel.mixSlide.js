@@ -1,45 +1,99 @@
-/*
-	Easing properties
-	*FADE : nothing
-	*SLIDE:
-		- direction : horizontal
-	*SLICE:
-		- direction : horizontal
-		- count : 2
-	
-*/
+
+//Plug-in constants
+const BOTTOM_POS = "bottom",
+	TOP_POS = "top",
+	LEFT_POS = "left",
+	RIGHT_POS = "right",
+	CENTER_POS = "center",
+	TOP_LEFT_POS = "top-left",
+	TOP_RIGHT_POS = "top-right",
+	BOTTOM_LEFT_POS = "bottom-left",
+	BOTTOM_RIGHT_POS = "bottom-right";
+const FOUR_POSITION = [TOP_POS, RIGHT_POS, BOTTOM_POS, LEFT_POS];
+	ORIGINS_POSITIONS = [TOP_LEFT_POS, TOP_RIGHT_POS, CENTER_POS, BOTTOM_LEFT_POS, BOTTOM_RIGHT_POS];
+const FORWARD = "forward",
+	BACKWARD = "backward";
+const VERTICAL_DIR = "vertical",
+	HORIZONTAL_DIR = "horizontal",
+	SKEW_1_DIR = "skew1";
+	SKEW_2_DIR = "skew2";
+const SIMPLE_DIRECTIONS = [VERTICAL_DIR, HORIZONTAL_DIR],
+	ALL_DIRECTIONS = [VERTICAL_DIR, HORIZONTAL_DIR, SKEW_1_DIR, SKEW_2_DIR];
+const CONTROLS_PREV_CODE = "&#10094",
+	CONTROLS_NEXT_CODE = "&#10095",
+	CONTROLS_PAUSE_CODE = "&#9208",
+	CONTROLS_PLAY_CODE = "&#9205",
+	CONTROLS_CLOSE_CODE = "&#10006";
+	CONTROLS_SQUARE_CODE = "&#11034";
+
+// Transitions
+const SIMPLE_TRANSITION = "simple", CUTTING_TRANSITION = "cutting", SHAPE_TRANSITION = "shape";
+const RANDOM = {
+		name : "random",
+		constant : false
+	},
+	FADE = {
+		name : "fade",
+		type : SIMPLE_TRANSITION
+	},
+	SLIDE = {
+		name : "slide",
+		type : SIMPLE_TRANSITION,
+		direction : HORIZONTAL_DIR
+	},
+	SLICES = {
+		name : "slices",
+		type : CUTTING_TRANSITION,
+		direction : HORIZONTAL_DIR,
+		count : 4
+	},
+	TILES = {
+		name : "tiles",
+		type : CUTTING_TRANSITION,
+		count : 16,
+		random : false
+	},
+	CIRCLE = {
+		name : "circle",
+		type : SHAPE_TRANSITION,
+		origin : "center"
+	},
+	SQUARE = {
+		name : "square",
+		type : SHAPE_TRANSITION,
+		origin : "center"
+	};
+const TRANSITIONS = [FADE, SLIDE, SLICES, TILES, CIRCLE, SQUARE];
+function getTransition(name){
+	let transition = null;
+	for (var i = 0; (i < TRANSITIONS.length && TRANSITIONS[i].name != name); i++);
+	if(i < TRANSITIONS.length)
+		transition = TRANSITIONS[i];
+	return transition;	
+}
+function chooseTransition(){
+	let transition = TRANSITIONS[Math.round(Math.random() * (TRANSITIONS.length-1))];
+	if(transition.type == SHAPE_TRANSITION){
+		transition.origin = ORIGINS_POSITIONS[Math.round(Math.random() * (ORIGINS_POSITIONS.length-1))];
+	}else if(transition.name == TILES.name){
+		transition.random = (Math.round(Math.random()) == 0) ? false : true;
+	}else if(transition.name == SLICES.name || transition.name == SLIDE.name){
+		transition.direction = SIMPLE_DIRECTIONS[Math.round(Math.random())];
+	}
+	return transition;
+}
 
 (function($){
 	$.fn.mixSlide = function(opt){
-		const BOTTOM_POS = "bottom",
-			TOP_POS = "top",
-			LEFT_POS = "left",
-			RIGHT_POS = "right";
-		const FADE_EASE = "fade",
-			SLIDE_EASE = "slide",
-			SLICE_EASE = "slice",
-			EASINGS = [FADE_EASE, SLIDE_EASE, SLICE_EASE];
-		const FORWARD = "forward",
-			BACKWARD = "backward";
-		const VERTICAL_DIR = "vertical",
-			HORIZONTAL_DIR = "horizontal",
-			SKEW_1_DIR = "skew1";
-			SKEW_2_DIR = "skew2";
-		const CONTROLS_PREV_CODE = "&#10094",
-			CONTROLS_NEXT_CODE = "&#10095",
-			CONTROLS_PAUSE_CODE = "&#9208",
-			CONTROLS_PLAY_CODE = "&#9205";
-		const PAUSE_STATE = "pause",
-			PLAY_STATE = "play";
 
-		var defaults = {
+		let defaults = {
+			fullscreen:false,
 			animation:{
 				speed:1,
 				delay:3
 			},
-			easing : {
-				name : SLIDE_EASE,
-				direction : HORIZONTAL_DIR
+			transition : {
+				name : "fade"
 			},
 			autoplay : true,
 			controls : {
@@ -50,30 +104,40 @@
 				active : false,
 				position : BOTTOM_POS
 			},
-			labels:true
-		}
+			labels:{
+				active:true,
+				position:TOP_LEFT_POS
+			}
+		};
+
 		let options = $.extend(true, defaults, opt);
 		//Checking the integrity of the parameters
 		options.animation.speed = options.animation.speed*1000;
 		options.animation.delay = options.animation.delay*1000;
-		if(EASINGS.indexOf(options.easing.name) != -1){
-			if(options.easing.name == SLIDE_EASE){
-				if(typeof options.easing.direction == "undefined")
-					options.easing.direction = HORIZONTAL_DIR;
-			}else if(options.easing.name == SLICE_EASE){
-				if(typeof options.easing.direction == "undefined")
-					options.easing.direction = HORIZONTAL_DIR;
-				if(typeof options.easing.count == "undefined" || isNaN(options.easing.count))
-					options.easing.count = 2;
-			}
+		if(options.transition.name != RANDOM.name){
+			let choosed_transition = getTransition(options.transition.name);
+			if(choosed_transition == null)
+				options.transition = FADE;
+			else
+				options.transition = $.extend(true, choosed_transition, options.transition);
 		}else{
-			options.easing.name = FADE_EASE;
+			if(options.transition.constant){
+				options.transition = chooseTransition();
+			}
 		}
 		//End checking
-		let $obj = $(this);
+		let $obj = $(this), timer;
 		this.each(function(){
+			//Update object data
+			$obj.data("mixSlide-options", options);
+			$obj.mixSlideData('animated', options.autoplay);
+			$obj.addClass('mixSlide-frame');
+			if(options.fullscreen){
+				$obj.addClass('fullscreen');
+			}
 			let images = [];
 			let $imageDivs = $obj.find('div');
+			//Retrive images and labels
 			for(let i = 0;i<$imageDivs.length;i++){
 				$imageDivs.eq(i).addClass("mixSlide-image");
 				images.push({
@@ -89,7 +153,11 @@
 			$imageDivs.eq(0).show(-1).css('z-index','1');
 			let currentImageIndex = 0,
 				lastImageIndex = images.length - 1;
-				
+			if(options.labels.active){
+				$images.find('p').addClass(options.labels.position);
+			}else{
+				$images.find('p').hide(-1);
+			}
 			if(options.thumbs.active){
 				let thumbs_code = '<div id="mixSlide-thumbs" class="'+options.thumbs.position+'">';
 				for(let i = 0; i < images.length; i++){
@@ -109,15 +177,21 @@
 			$container.append('<div id="mixSlide-controls" class="'+options.controls.position+'"></div>');
 			let $controls = $container.find("#mixSlide-controls");
 
+			//Controls buttons
 			if(options.controls){
-				//Petits boutons de controls
 				let controls_code = '\
 					<div id="mixSlide-slide-buttons">\
 						<span id="mixSlide-prev">'+CONTROLS_PREV_CODE+'</span>\
 						<span id="mixSlide-next">'+CONTROLS_NEXT_CODE+'</span>\
-						<span id="mixSlide-slide-state" data-state="'+PAUSE_STATE+'">'+CONTROLS_PLAY_CODE+'</span>\
+						<span id="mixSlide-start-slide">'+CONTROLS_PLAY_CODE+'</span>\
+						<span id="mixSlide-open-close-fullscreen">'+CONTROLS_SQUARE_CODE+'</span>\
 					</div>';
 				$controls.append(controls_code);
+				if($obj.mixSlideData('animated'))
+					$controls.find('#mixSlide-start-slide').html(CONTROLS_PAUSE_CODE);
+				if(options.fullscreen){
+					$controls.find('#mixSlide-open-close-fullscreen').html(CONTROLS_CLOSE_CODE);
+				}
 				if(!options.thumbs.active){
 					let points_code = '<div id="mixSlide-points">';
 					for(let i = 0; i < images.length; i++){
@@ -135,8 +209,32 @@
 				}
 				$controls.find('#mixSlide-prev').click(function(){changeImage(BACKWARD);});
 				$controls.find('#mixSlide-next').click(function(){changeImage(FORWARD);});
+				$controls.find('#mixSlide-start-slide').click(function(){
+					if($obj.mixSlideData('animated')){
+						stopAnimation();
+						$(this).html(CONTROLS_PLAY_CODE);
+					}else{
+						launchAnimation();
+						$(this).html(CONTROLS_PAUSE_CODE);
+					}
+				});
+				$controls.find('#mixSlide-open-close-fullscreen').click(function(){
+					if($obj.mixSlideData('fullscreen')){
+						$obj.mixSlideData('fullscreen', false);
+						$(this).html(CONTROLS_SQUARE_CODE);
+					}else{
+						$obj.mixSlideData('fullscreen', true);
+						$(this).html(CONTROLS_CLOSE_CODE);
+					}
+				});
 			}
-			function changeImage(dir, nextImageIndex = -1){
+
+
+			let transition = options.transition;
+			function changeImage(dir, nextImageIndex = -1, isAutomatic = false){
+				if(options.transition.name == RANDOM.name){
+					transition = chooseTransition();
+				}
 				if(nextImageIndex == -1){
 					nextImageIndex = currentImageIndex+1;
 					if(dir == BACKWARD){
@@ -149,104 +247,301 @@
 						nextImageIndex = 0;
 					}
 				}
+				if(!isAutomatic && $obj.mixSlideData('animated')){
+					stopAnimation();
+					setTimeout(launchAnimation, options.animation.speed);
+				}
 				//Variables for animation
 				let currentTemp = currentImageIndex, nextTemp = nextImageIndex;
-				let easing = options.easing;
-				if(easing.name == FADE_EASE){
-					$imageDivs.eq(nextTemp).css("z-index", "1").fadeIn(options.animation.speed);
-					$imageDivs.eq(currentTemp).fadeOut(options.animation.speed).css("z-index", "0");
-				}else if(easing.name == SLIDE_EASE){
-					let animated_property_forward = {left:"-100%"},
-						animated_property_backward = {left:"0"};
-					if(easing.direction == VERTICAL_DIR){
-						animated_property_forward.left = "0";
-						animated_property_forward.top = "-100%";
-						animated_property_backward.top = "0";
-					}else if(easing.direction == SKEW_1_DIR){
-						animated_property_forward.top = "-100%";
-						animated_property_backward.top = "0";
-					}else if(easing.direction == SKEW_2_DIR){
-						animated_property_forward.bottom = "-100%";
-						animated_property_backward.bottom = "0";
+				//Simple transition
+				if(transition.type == SIMPLE_TRANSITION)
+				{
+					//Fade Transition
+					if(transition.name == FADE.name)
+					{
+						$imageDivs.eq(nextTemp).css("z-index", "1").fadeIn(options.animation.speed);
+						$imageDivs.eq(currentTemp).fadeOut(options.animation.speed).css("z-index", "0");
 					}
-					if(dir == FORWARD){
-						$imageDivs.eq(nextTemp).show(-1);
-						$imageDivs.eq(currentTemp).animate(animated_property_forward, 
-							options.animation.speed, function(){
-								$(this).css({"z-index":"0"}).css(animated_property_backward).hide(-1);
-								$imageDivs.eq(nextTemp).css("z-index", "1");
-							}
-						);
-					}else{
-						$imageDivs.eq(currentTemp).css({"z-index":"0"});
-						$imageDivs.eq(nextTemp).css(animated_property_forward).css({"z-index":"1"}).show(-1);
-						$imageDivs.eq(nextTemp).animate(animated_property_backward, 
-							options.animation.speed, function(){
-								$imageDivs.eq(currentTemp).hide(-1);
-							}
-						);
+					//Slide Transition
+					else if(transition.name == SLIDE.name)
+					{
+						let animated_property_forward = {left:"-100%"},
+							animated_property_backward = {left:"0"};
+						if(transition.direction == VERTICAL_DIR){
+							animated_property_forward.left = "0";
+							animated_property_forward.top = "-100%";
+							animated_property_backward.top = "0";
+						}else if(transition.direction == SKEW_1_DIR){
+							animated_property_forward.top = "-100%";
+							animated_property_backward.top = "0";
+						}else if(transition.direction == SKEW_2_DIR){
+							animated_property_forward.bottom = "-100%";
+							animated_property_backward.bottom = "0";
+						}
+						if(dir == FORWARD){
+							$imageDivs.eq(nextTemp).show(-1);
+							$imageDivs.eq(currentTemp).animate(animated_property_forward, 
+								options.animation.speed, function(){
+									$(this).css({"z-index":"0"}).css(animated_property_backward).hide(-1);
+									$imageDivs.eq(nextTemp).css("z-index", "1");
+								}
+							);
+						}else{
+							$imageDivs.eq(currentTemp).css({"z-index":"0"});
+							$imageDivs.eq(nextTemp).css(animated_property_forward).css({"z-index":"1"}).show(-1);
+							$imageDivs.eq(nextTemp).animate(animated_property_backward, 
+								options.animation.speed, function(){
+									$imageDivs.eq(currentTemp).hide(-1);
+								}
+							);
+						}
 					}
-				}else if(easing.name == SLICE_EASE){
-					let animated_even_forward = {left:"-100%"},
-						animated_odd_forward = {left:"100%"},
-						animated_backward = {left:"0"},
-						image_changed_property = "height",
-						div_margin_changed = "top";
-					if(easing.direction == VERTICAL_DIR){
-						animated_even_forward = {top:"-100%"};
-						animated_odd_forward = {top:"100%"};
-						animated_backward = {top:"0"};
-						image_changed_property = "width";
-						div_margin_changed = "left";
-					}
-					let imageIndex = (dir == FORWARD) ? currentTemp : nextTemp;
-					// Div over
+				}
+				//Cutting transition
+				else if(transition.type == CUTTING_TRANSITION)
+				{
 					$images.find('#mixSlide-div-over').remove();
 					$images.append('<div id="mixSlide-div-over"></div>');
-					let $divOver = $images.find('#mixSlide-div-over');
-					for(let i = 0;i<options.easing.count;i++){
-						$divOver.append('\
-							<div class="mixSlide-div-clip slice '+options.easing.direction+'" data-number="'+i+'">\
-								<img src="'+images[imageIndex].src+'"/>\
-							</div>'
-						);
+					let $divOver = $images.find('#mixSlide-div-over'),
+						imageIndex = (dir == FORWARD) ? currentTemp : nextTemp;
+					//Slices transition
+					if(transition.name == SLICES.name)
+					{
+						let animated_even_forward = {left:"-100%"},
+							animated_odd_forward = {left:"100%"},
+							animated_backward = {left:"0"};
+						if(transition.direction == VERTICAL_DIR){
+							animated_even_forward = {top:"-100%"};
+							animated_odd_forward = {top:"100%"};
+							animated_backward = {top:"0"};
+						}
+						// Div over
+						for(let i = 0;i<transition.count;i++){
+							$divOver.append('\
+								<div class="mixSlide-div-clip slice '+transition.direction+'" data-number="'+i+'">\
+									<img src="'+images[imageIndex].src+'"/>\
+								</div>'
+							);
+						}
+						let size = (100/transition.count);
+						$divOver.find('div').each(function(){
+							let number = parseInt($(this).attr('data-number'));
+							if(transition.direction == HORIZONTAL_DIR)
+								clipSquare($(this), 0, number*size, 100, size);
+							else
+								clipSquare($(this), number*size, 0, size, 100);
+							
+							if(dir == FORWARD){
+								$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
+								$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
+								if(number%2 == 0){
+									$(this).animate(animated_even_forward, options.animation.speed);
+								}else{
+									$(this).animate(animated_odd_forward, options.animation.speed);
+								}
+							}else{
+								if(number%2 == 0){
+									$(this).css(animated_even_forward);
+									$(this).animate(animated_backward, options.animation.speed);
+								}else{
+									$(this).css(animated_odd_forward);
+									$(this).animate(animated_backward, options.animation.speed, function(){
+										$imageDivs.eq(currentTemp).css({"z-index":"0"}).hide(-1);
+										$imageDivs.eq(nextTemp).css({"z-index":"1"}).show(-1);
+									});
+								}
+							}
+						});
 					}
-					let size = (100/easing.count);
-					$divOver.find('div').each(function(){
-						let number = parseInt($(this).attr('data-number'));
-						let P1 = "0% "+number*size+"%",
-							P2 = "100% "+number*size+"%",
-							P3 = "100% "+((number+1)*size)+"%",
-							P4 = "0% "+((number+1)*size)+"%";
-						if(easing.direction == VERTICAL_DIR){
-							P1 = number*size+"% 0%";
-							P2 = number*size+"% 100%";
-							P3 = ((number+1)*size)+"% 100%";
-							P4 = ((number+1)*size)+"% 0%";
+					//Tiles transition
+					else if(transition.name == TILES.name)
+					{
+						let animated_forward = {}, 
+							animated_backward = {left:"0", top:"0"},
+							sqrt_count = Math.sqrt(transition.count);
+						let k = 0;
+						for(let i = 0;i<sqrt_count;i++){
+							for(let j = 0;j<sqrt_count;j++){
+								$divOver.append('\
+									<div class="mixSlide-div-clip slice '+options.transition.direction+'" data-number="'+k+'" data-x="'+i+'" data-y="'+j+'">\
+										<img src="'+images[imageIndex].src+'"/>\
+									</div>'
+								);
+								k++;
+							}
 						}
-						$(this).css('clip-path', 'polygon('+P1+','+P2+','+P3+','+P4+')');
+						let size = 100/sqrt_count;
+						$divOver.find('div').each(function(){
+							let x = parseInt($(this).attr('data-x')),
+								y = parseInt($(this).attr('data-y'));
+							clipSquare($(this), x*size, y*size, size)
+						});
+						let unitSpeed = options.animation.speed/transition.count;
+						//Animation width random order
+						if(transition.random)
+						{
+							let number = 0, $element,  x, y, distance_left, distance_top, elements_numbers = [];//Couples' elements (x&y)
+							let element_number;
+							do{
+								do{
+									element_number = Math.floor(Math.random()*transition.count);
+								}while(elements_numbers.indexOf(element_number) != -1);
+								elements_numbers.push(element_number);
+								let $element = $divOver.find('div[data-number="'+element_number+'"]');
+								animated_forward.left = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
+								animated_forward.top = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
+								if(dir == FORWARD){
+									$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
+									$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
+									$element.animate(animated_forward, unitSpeed*(number+1));
+								}else{
+									$element.css(animated_forward);
+									if(number == transition.count-1){
+										$element.animate(animated_backward, unitSpeed*(number+1), function(){
+											$imageDivs.eq(currentTemp).css({"z-index":"0"}).hide(-1);
+											$imageDivs.eq(nextTemp).css({"z-index":"1"}).show(-1);
+										});
+									}else{
+										$element.animate(animated_backward, unitSpeed*(number+1));
+									}
+								}
+								number++;
+							}while(number < transition.count);
+						}
+						//Animation with defined order
+						else
+						{ 
+							let number = 0, $element;
+							if(dir == FORWARD){
+								$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
+								$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
+							}
+							animated_forward.left = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
+							animated_forward.top = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
+							for(let i = 0;i<sqrt_count;i++){
+								for(let j = 0;j<sqrt_count;j++){
+									$element = $divOver.find('div[data-x="'+i+'"][data-y="'+j+'"]');
+									if(dir == FORWARD){
+										$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
+										$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
+										$element.animate(animated_forward, unitSpeed*(number+1));
+									}else{
+										$element.css(animated_forward);
+										if(number == transition.count-1){
+											$element.animate(animated_backward, unitSpeed*(number+1), function(){
+												$imageDivs.eq(currentTemp).css({"z-index":"0"}).hide(-1);
+												$imageDivs.eq(nextTemp).css({"z-index":"1"}).show(-1);
+											});
+										}else{
+											$element.animate(animated_backward, unitSpeed*(number+1));
+										}
+									}
+									number++;
+								}
+							}
+						}
+					}
+				}
+				//Shape transition
+				else if(transition.type == SHAPE_TRANSITION)
+				{
+					let origin,  x = 50, y = 50, radius = 70;
+					if(transition.origin != CENTER_POS)
+						if(transition.name == CIRCLE.name)
+							radius = 150;
+						else
+							radius = 100;
+					switch(transition.origin){
+						case TOP_LEFT_POS: x = 0, y = 0;break;
+						case TOP_RIGHT_POS: x = 100, y =  0;break;
+						case BOTTOM_LEFT_POS: x = 0, y =  100;break;
+						case BOTTOM_RIGHT_POS: x = 100, y = 100;break;
+					}
+					origin = x+"% "+y+"%";
+					//Circle transition
+					if(transition.name == CIRCLE.name)
+					{
+						
 						if(dir == FORWARD){
-							$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
-							$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
-							if(number%2 == 0){
-								$(this).animate(animated_even_forward, options.animation.speed);
-							}else{
-								$(this).animate(animated_odd_forward, options.animation.speed);
-							}
+							$imageDivs.eq(nextTemp).css({"clip-path":"circle(0% at "+origin+")", "z-index":"1"}).show(-1);
+							$imageDivs.eq(currentTemp).css({"z-index":"0"});
+							$imageDivs.eq(nextTemp).animate(
+								{step:radius},
+								{
+									duration:options.animation.speed,
+									step:function(val){
+										$imageDivs.eq(nextTemp).css({"clip-path":"circle("+val+"% at "+origin+")"});
+									},
+									always : function(){
+										$imageDivs.eq(currentTemp).hide(-1);
+										$imageDivs.eq(nextTemp).css({"clip-path":"none"}).animate({step:0},0);
+									}
+								}
+							);
 						}else{
-							if(number%2 == 0){
-								$(this).css(animated_even_forward);
-								$(this).animate(animated_backward, options.animation.speed);
-							}else{
-								$(this).css(animated_odd_forward);
-								$(this).animate(animated_backward, options.animation.speed, function(){
-									$imageDivs.eq(currentTemp).css({"z-index":"0"}).hide(-1);
-									$imageDivs.eq(nextTemp).css({"z-index":"1"}).show(-1);
-								});
-							}
+							$imageDivs.eq(nextTemp).css({"z-index":"0"}).show(-1);
+							$imageDivs.eq(currentTemp).css('clip-path', 'circle('+radius+'% at '+origin+')')
+							$imageDivs.eq(currentTemp).animate(
+								{step:radius},
+								{
+									duration:options.animation.speed,
+									step:function(val){
+										$imageDivs.eq(currentTemp).css({"clip-path":"circle("+(radius-val)+"% at "+origin+")"});
+									},
+									always:function(){
+										$imageDivs.eq(nextTemp).css("z-index", "1");
+										$imageDivs.eq(currentTemp).css({"clip-path":"none","z-index":"0"}).hide(-1).animate({step:0},0);
+										
+									}
+								}
+							);
 						}
-					});
-
+					}
+					//Square transition
+					else if(transition.name == SQUARE.name)
+					{
+						let x_m, x_p, y_m, y_p;
+						if(dir == FORWARD){
+							$imageDivs.eq(nextTemp).css({
+								"clip-path":"polygon("+x+"% "+y+"%, "+x+"% "+y+"%, "+x+"% "+y+"%, "+x+"% "+y+"%)",
+								"z-index":"1"
+							}).show(-1);
+							$imageDivs.eq(currentTemp).css({"z-index":"0"});
+							$imageDivs.eq(nextTemp).animate(
+								{step:radius},
+								{
+									duration:options.animation.speed,
+									step:function(val){
+										x_m = x-val, x_p = x+val, y_m = y-val, y_p = y+val;
+										$imageDivs.eq(nextTemp).css({"clip-path":"polygon("+x_m+"% "+y_m+"%, "+x_p+"% "+y_m+"%, "+x_p+"% "+y_p+"%, "+x_m+"% "+y_p+"%)"});
+									},
+									always : function(){
+										$imageDivs.eq(currentTemp).hide(-1);
+										$imageDivs.eq(nextTemp).css({"clip-path":"none"}).animate({step:0},0);
+									}
+								}
+							);
+						}else{
+							$imageDivs.eq(nextTemp).css({"z-index":"0"}).show(-1);
+							x_m = x-radius, x_p = x+radius, y_m = y-radius, y_p = y+radius;									
+							$imageDivs.eq(currentTemp).css('clip-path',"polygon("+x_m+"% "+y_m+"%, "+x_p+"% "+y_m+"%, "+x_p+"% "+y_p+"%, "+x_m+"% "+y_p+"%)");
+							$imageDivs.eq(currentTemp).animate(
+								{step:radius},
+								{
+									duration:options.animation.speed,
+									step:function(val){
+										x_m = x-(radius-val), x_p = x+(radius-val), y_m = y-(radius-val), y_p = y+(radius-val);
+										$imageDivs.eq(currentTemp).css({"clip-path":"polygon("+x_m+"% "+y_m+"%, "+x_p+"% "+y_m+"%, "+x_p+"% "+y_p+"%, "+x_m+"% "+y_p+"%)"});
+									},
+									always:function(){
+										$imageDivs.eq(nextTemp).css("z-index", "1");
+										$imageDivs.eq(currentTemp).css({"clip-path":"none","z-index":"0"}).hide(-1).animate({step:0},0);
+										
+									}
+								}
+							);
+						}
+					}
 				}
 				currentImageIndex = nextImageIndex;
 				refresh();
@@ -258,16 +553,54 @@
 				$container.find('#mixSlide-thumbs span').eq(currentImageIndex).addClass('active');
 			}
 			refresh();
-			if(options.autoplay){
-				function animation(){
-					setTimeout(function(){
-						changeImage(FORWARD);
-						animation();
-					}, options.animation.delay);
-				}
-				animation();
+			function animation(){
+				changeImage(FORWARD, -1, true);
 			}
+			function launchAnimation(){
+				timer = setInterval(animation, options.animation.delay+options.animation.speed);
+				$obj.mixSlideData('animated', true);
+			}
+			function stopAnimation(){
+				clearInterval(timer);
+				$obj.mixSlideData('animated', false);
+			}
+			if(options.autoplay)
+				launchAnimation();
 		});
 		return this;
+	}
+
+
+	function clipSquare($element, x, y, width, height = null){
+		if (height == null)
+			height = width;
+		let P1 = x+"% "+y+"%",
+			P2 = (x+width)+"% "+y+"%",
+			P3 = (x+width)+"% "+(y+height)+"%",
+			P4 = x+"% "+(y+height)+"%";
+		$element.css('clip-path', 'polygon('+P1+', '+P2+', '+P3+', '+P4+')');
+	}
+
+	$.fn.mixSlideData = function(datum, val = null){
+		let $obj = $(this);
+		if(val == null){
+			return $obj.data("mixSlide-options")[datum];
+		}else{
+			if(typeof datum == "string"){
+				let mixSlide_options = $obj.data("mixSlide-options");
+				mixSlide_options[datum] = val;
+				if(datum == "fullscreen"){
+					if(val){
+						$obj.addClass('fullscreen');
+					}else{
+						$obj.removeClass('fullscreen');
+					}
+				}
+				$obj.data("mixSlide-options", mixSlide_options);
+			}else{
+				console.log("Error (mixSlideData : the datum must be a string");
+			}
+			return this;
+		}
 	}
 })(jQuery);

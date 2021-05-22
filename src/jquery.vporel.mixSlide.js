@@ -1,12 +1,4 @@
 /*
-	MIXSLIDE plug-in 
-	Author : Nkouanang kepseu vivian porel
-	Pseudo : vporel
-	Version : 1.0 Beta
-	Description : A slideshow plug-in with amazing transitions
-*/
-
-/*
 	Easing properties
 	*FADE : nothing
 	*SLIDE:
@@ -14,6 +6,11 @@
 	*SLICE:
 		- direction : horizontal
 		- count : 2
+	*SQUARE:
+		- count : 4
+		- random : false
+	*circle:
+		- origin : center
 	
 */
 
@@ -22,11 +19,18 @@
 		const BOTTOM_POS = "bottom",
 			TOP_POS = "top",
 			LEFT_POS = "left",
-			RIGHT_POS = "right";
+			RIGHT_POS = "right",
+			CENTER_POS = "center",
+			TOP_LEFT_POS = "top-left",
+			TOP_RIGHT_POS = "top-right",
+			BOTTOM_LEFT_POS = "bottom-left",
+			BOTTOM_RIGHT_POS = "bottom-right";
 		const FADE_EASE = "fade",
 			SLIDE_EASE = "slide",
 			SLICE_EASE = "slice",
-			EASINGS = [FADE_EASE, SLIDE_EASE, SLICE_EASE];
+			SQUARE_EASE = "square",
+			CIRCLE_EASE = "circle",
+			EASINGS = [FADE_EASE, SLIDE_EASE, SLICE_EASE, SQUARE_EASE, CIRCLE_EASE];
 		const FORWARD = "forward",
 			BACKWARD = "backward";
 		const VERTICAL_DIR = "vertical",
@@ -73,6 +77,14 @@
 					options.easing.direction = HORIZONTAL_DIR;
 				if(typeof options.easing.count == "undefined" || isNaN(options.easing.count))
 					options.easing.count = 2;
+			}else if(options.easing.name == SQUARE_EASE){
+				if(typeof options.easing.count == "undefined" || isNaN(options.easing.count) || !Number.isInteger(Math.sqrt(options.easing.count)))
+					options.easing.count = 9;
+				if(typeof options.easing.random == "undefined")
+					options.easing.random = false;
+			}else if(options.easing.name == CIRCLE_EASE){
+				if(typeof options.easing.origin == "undefined")
+					options.easing.origin = "center";
 			}
 		}else{
 			options.easing.name = FADE_EASE;
@@ -197,24 +209,20 @@
 				}else if(easing.name == SLICE_EASE){
 					let animated_even_forward = {left:"-100%"},
 						animated_odd_forward = {left:"100%"},
-						animated_backward = {left:"0"},
-						image_changed_property = "height",
-						div_margin_changed = "top";
+						animated_backward = {left:"0"};
 					if(easing.direction == VERTICAL_DIR){
 						animated_even_forward = {top:"-100%"};
 						animated_odd_forward = {top:"100%"};
 						animated_backward = {top:"0"};
-						image_changed_property = "width";
-						div_margin_changed = "left";
 					}
-					let imageIndex = (dir == FORWARD) ? currentTemp : nextTemp;
 					// Div over
+					let imageIndex = (dir == FORWARD) ? currentTemp : nextTemp;
 					$images.find('#mixSlide-div-over').remove();
 					$images.append('<div id="mixSlide-div-over"></div>');
 					let $divOver = $images.find('#mixSlide-div-over');
-					for(let i = 0;i<options.easing.count;i++){
+					for(let i = 0;i<easing.count;i++){
 						$divOver.append('\
-							<div class="mixSlide-div-clip slice '+options.easing.direction+'" data-number="'+i+'">\
+							<div class="mixSlide-div-clip slice '+easing.direction+'" data-number="'+i+'">\
 								<img src="'+images[imageIndex].src+'"/>\
 							</div>'
 						);
@@ -222,17 +230,11 @@
 					let size = (100/easing.count);
 					$divOver.find('div').each(function(){
 						let number = parseInt($(this).attr('data-number'));
-						let P1 = "0% "+number*size+"%",
-							P2 = "100% "+number*size+"%",
-							P3 = "100% "+((number+1)*size)+"%",
-							P4 = "0% "+((number+1)*size)+"%";
-						if(easing.direction == VERTICAL_DIR){
-							P1 = number*size+"% 0%";
-							P2 = number*size+"% 100%";
-							P3 = ((number+1)*size)+"% 100%";
-							P4 = ((number+1)*size)+"% 0%";
-						}
-						$(this).css('clip-path', 'polygon('+P1+','+P2+','+P3+','+P4+')');
+						if(easing.direction == HORIZONTAL_DIR)
+							clipSquare($(this), 0, number*size, 100, size);
+						else
+							clipSquare($(this), number*size, 0, size, 100);
+						
 						if(dir == FORWARD){
 							$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
 							$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
@@ -254,7 +256,143 @@
 							}
 						}
 					});
+				}else if(easing.name == SQUARE_EASE){
 
+					let animated_forward = {}, animated_backward = {left:"0", top:"0"};
+
+					let imageIndex = (dir == FORWARD) ? currentTemp : nextTemp;
+					let sqrt_count = Math.sqrt(easing.count);
+					$images.find('#mixSlide-div-over').remove();
+					$images.append('<div id="mixSlide-div-over"></div>');
+					let $divOver = $images.find('#mixSlide-div-over');
+					let k = 0;
+					for(let i = 0;i<sqrt_count;i++){
+						for(let j = 0;j<sqrt_count;j++){
+							$divOver.append('\
+								<div class="mixSlide-div-clip slice '+options.easing.direction+'" data-number="'+k+'" data-x="'+i+'" data-y="'+j+'">\
+									<img src="'+images[imageIndex].src+'"/>\
+								</div>'
+							);
+							k++;
+						}
+					}
+					let size = 100/sqrt_count;
+					$divOver.find('div').each(function(){
+						let x = parseInt($(this).attr('data-x')),
+							y = parseInt($(this).attr('data-y')),
+							number = parseInt($(this).attr('data-number'));
+						clipSquare($(this), x*size, y*size, size)
+					});
+
+					let unitSpeed = options.animation.speed/easing.count;
+					if(easing.random){
+						//Animation width random order
+						let number = 0, $element,  x, y, distance_left, distance_top, couples = [];//Couples' elements (x&y)
+						do{
+							do{
+								x = Math.floor(Math.random()*sqrt_count);
+								y = Math.floor(Math.random()*sqrt_count);
+								
+								console.log("x - "+x+", y - "+y);
+							}while(couples.indexOf(x+"&"+y) != -1);
+							couples.push(x+"&"+y);
+							let $element = $divOver.find('div[data-x="'+x+'"][data-y="'+y+'"]');
+							animated_forward.left = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
+							animated_forward.top = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
+							if(dir == FORWARD){
+								$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
+								$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
+								$element.animate(animated_forward, unitSpeed*(number+1));
+							}else{
+								$element.css(animated_forward);
+								if(number == easing.count-1){
+									$element.animate(animated_backward, unitSpeed*(number+1), function(){
+										$imageDivs.eq(currentTemp).css({"z-index":"0"}).hide(-1);
+										$imageDivs.eq(nextTemp).css({"z-index":"1"}).show(-1);
+									});
+								}else{
+									$element.animate(animated_backward, unitSpeed*(number+1));
+								}
+							}
+							number++;
+
+						}while(number < easing.count);
+					}else{
+						 //Animation with defined order 
+						let number = 0, $element;
+						if(dir == FORWARD){
+							$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
+							$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
+						}
+						animated_forward.left = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
+						animated_forward.top = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
+						for(let i = 0;i<sqrt_count;i++){
+							for(let j = 0;j<sqrt_count;j++){
+								$element = $divOver.find('div[data-x="'+i+'"][data-y="'+j+'"]');
+								if(dir == FORWARD){
+									$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
+									$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
+									$element.animate(animated_forward, unitSpeed*(number+1));
+								}else{
+									$element.css(animated_forward);
+									if(number == easing.count-1){
+										$element.animate(animated_backward, unitSpeed*(number+1), function(){
+											$imageDivs.eq(currentTemp).css({"z-index":"0"}).hide(-1);
+											$imageDivs.eq(nextTemp).css({"z-index":"1"}).show(-1);
+										});
+									}else{
+										$element.animate(animated_backward, unitSpeed*(number+1));
+									}
+								}
+								number++;
+							}
+						}
+					}
+				}else if(easing.name == CIRCLE_EASE){
+					let radius = 70,
+						origin = "50% 50%";
+					if(easing.origin != CENTER_POS)
+						radius = 150;
+					switch(easing.origin){
+						case TOP_LEFT_POS: origin = "0% 0%";break;
+						case TOP_RIGHT_POS: origin = "100% 0%";break;
+						case BOTTOM_LEFT_POS: origin = "0% 100%";break;
+						case BOTTOM_RIGHT_POS: origin = "100% 100%";break;
+					}
+					if(dir == FORWARD){
+						$imageDivs.eq(nextTemp).css({"clip-path":"circle(0% at "+origin+")", "z-index":"1"}).show(-1);
+						$imageDivs.eq(currentTemp).css({"z-index":"0"});
+						$imageDivs.eq(nextTemp).animate(
+							{step:radius},
+							{
+								duration:options.animation.speed,
+								step:function(val){
+									$imageDivs.eq(nextTemp).css({"clip-path":"circle("+val+"% at "+origin+")"});
+								},
+								always : function(){
+									$imageDivs.eq(currentTemp).hide(-1);
+									$imageDivs.eq(nextTemp).css({"clip-path":"none"}).animate({step:0},0);
+								}
+							}
+						);
+					}else{
+						$imageDivs.eq(nextTemp).css({"z-index":"0"}).show(-1);
+						$imageDivs.eq(currentTemp).css('clip-path', 'circle('+radius+'% at '+origin+')')
+						$imageDivs.eq(currentTemp).animate(
+							{step:radius},
+							{
+								duration:options.animation.speed,
+								step:function(val){
+									$imageDivs.eq(currentTemp).css({"clip-path":"circle("+(radius-val)+"% at "+origin+")"});
+								},
+								always:function(){
+									$imageDivs.eq(nextTemp).css("z-index", "1");
+									$imageDivs.eq(currentTemp).css({"clip-path":"none","z-index":"0"}).hide(-1).animate({step:0},0);
+									
+								}
+							}
+						);
+					}
 				}
 				currentImageIndex = nextImageIndex;
 				refresh();
@@ -271,7 +409,7 @@
 					setTimeout(function(){
 						changeImage(FORWARD);
 						animation();
-					}, options.animation.delay);
+					}, options.animation.delay+options.animation.speed);
 				}
 				animation();
 			}
@@ -279,3 +417,13 @@
 		return this;
 	}
 })(jQuery);
+
+function clipSquare($element, x, y, width, height = null){
+	if (height == null)
+		height = width;
+	let P1 = x+"% "+y+"%",
+		P2 = (x+width)+"% "+y+"%",
+		P3 = (x+width)+"% "+(y+height)+"%",
+		P4 = x+"% "+(y+height)+"%";
+	$element.css('clip-path', 'polygon('+P1+', '+P2+', '+P3+', '+P4+')');
+}

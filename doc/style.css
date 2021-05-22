@@ -1,0 +1,22 @@
+body{
+	margin:0;font:1.0em sans-serif;
+}
+#title{
+	position:sticky;z-index:1;top:0;margin:0;padding:10px;background:rgb(0,150,210);
+	font:2em comic sans ms;color:white;height:50px;border-bottom:4px solid white;
+}
+#summary{
+	position: sticky;top:74px;width:25%;padding:5px;background:rgb(230,230,230);min-height:600px;
+}
+	#summary ol a{text-decoration: none;color:blue;}
+	#summary ol a:hover{text-decoration: underline;}
+	#summary li{padding:3px 0;}
+#content{
+	width:72%;
+}
+#summary, #content{display: inline-block;vertical-align: top;}
+
+.article h3{
+	border-bottom:2px solid black;width:100%;background:rgb(230,230,230);
+	padding:5px;margin:5px 0;
+}

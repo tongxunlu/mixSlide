@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+	<meta charset="UTF-8"/>
+	<title>MixSlide - documentation</title>
+	<link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+<body>
+	<h1 id="title"><strong>MixSlide</strong> - <i>Documentation</i></h1>
+	<section id="summary">
+		<section id="code-infos">
+			<h2>Code informations</h3>
+			<dl>
+				<dt>Author</dt>
+				<dd>NKOUANANG KEPSEU Vivian Porel</dd>
+				<dt>Languages</dt>
+				<dd>HTML - CSS - <strong>JavaScript (<i>JQuery</i>)</strong></dd>
+				<details>
+					<summary>Details</summary>
+					A plug-in developped to make slideshow implementation easy in web sites and web applications
+				</details>
+			</dl>
+		</section>
+		<h2>Summary</h2>
+		<ol>
+			<li><a href="#basic-html-code">Basic HTML code</a></li>
+			<li><a href="#css-style">CSS style</a></li>
+			<li><a href="#script">Script to make application work</a></li>
+			<li>
+				<a href="#">Plug-in Options</a>
+				<ul>
+					<li>
+						<a href="#">Simples options</a><br>
+						<i>Autoplay</i> - <i>Fullscreen</i>
+					</li>
+					<strong>objects options</strong>
+					<li><a href="#">Labels</a></li>
+					<li><a href="#">Transitions</a></li>
+					<li><a href="#">Controls</a></li>
+					<li><a href="#">Thumbs (thumbnails)</a></li>
+				</ul>
+			</li>
+		</ol>
+	</section>
+	<section id="content">
+		<div id="basic-html-code" class="article">
+			<h3>Basic HTML code</h3>
+			<img src="images/basic-html-code.JPG"/>
+			<ul>
+				<li><i>First</i><br>
+					You have to include css and javascript MixSlide files (mixSlide.css & mixSlide.js)
+				</li>
+				<li><i>Second</i><br> 
+					You must have a division with a particular html code. That division must have an identifier
+					<ul>
+						<li>Differents <strong>divs</strong> tag in the parent div<br>
+							According to the number of the number of images</li>
+						<li>One <strong>img</strong> tag in each div</li>
+						<li>One <strong>p</strong> tag in each div to give a label to the image. It must be a description or a imple name. This tag is optional</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+		<div id="css-style" class="article">
+			<h3>CSS Style</h3>
+			<p>You can change the style of some object on the slider. Here is the full list of changeable objects (selectors)</p>
+			<ul>
+				<li>
+					<strong>Overlay in fullscreen mode</strong><br>
+					.mixSlide-frame.fullscreen : background (default : rgba(0,0,0,.7))
+				</li>
+				<li><strong>Container background</strong><br>
+					.mixSlide-container : background (default : black)
+				</li>
+				<li><strong>Labels for images</strong><br>
+					.mixSlide-images p : all properties to stylize text, background, color, font, etc.
+				</li>
+			</ul>
+		</div>
+		<div id="script" class="article">
+			<h3>Script to make application work</h3>
+			<img src="images/script.JPG"/>
+			<p>
+				This is an exemple of script to make the slider works. 
+				In the next part you have differents options for this mixSlide plug-in
+			</p>
+		</div>
+	</section>
+</body>
+</html>
