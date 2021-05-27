@@ -1,84 +1,84 @@
 
 //Plug-in constants
-const BOTTOM_POS = "bottom",
-	TOP_POS = "top",
-	LEFT_POS = "left",
-	RIGHT_POS = "right",
-	CENTER_POS = "center",
-	TOP_LEFT_POS = "top-left",
-	TOP_RIGHT_POS = "top-right",
-	BOTTOM_LEFT_POS = "bottom-left",
-	BOTTOM_RIGHT_POS = "bottom-right";
-const FOUR_POSITION = [TOP_POS, RIGHT_POS, BOTTOM_POS, LEFT_POS];
-	ORIGINS_POSITIONS = [TOP_LEFT_POS, TOP_RIGHT_POS, CENTER_POS, BOTTOM_LEFT_POS, BOTTOM_RIGHT_POS];
-const FORWARD = "forward",
-	BACKWARD = "backward";
-const VERTICAL_DIR = "vertical",
-	HORIZONTAL_DIR = "horizontal",
-	SKEW_1_DIR = "skew1";
-	SKEW_2_DIR = "skew2";
-const SIMPLE_DIRECTIONS = [VERTICAL_DIR, HORIZONTAL_DIR],
-	ALL_DIRECTIONS = [VERTICAL_DIR, HORIZONTAL_DIR, SKEW_1_DIR, SKEW_2_DIR];
-const CONTROLS_PREV_CODE = "&#10094",
-	CONTROLS_NEXT_CODE = "&#10095",
-	CONTROLS_PAUSE_CODE = "&#9208",
-	CONTROLS_PLAY_CODE = "&#9205",
-	CONTROLS_CLOSE_CODE = "&#10006";
-	CONTROLS_SQUARE_CODE = "&#11034";
+const MXS_BOTTOM_POS = "bottom",
+	MXS_TOP_POS = "top",
+	MXS_LEFT_POS = "left",
+	MXS_RIGHT_POS = "right",
+	MXS_CENTER_POS = "center",
+	MXS_TOP_LEFT_POS = "top-left",
+	MXS_TOP_RIGHT_POS = "top-right",
+	MXS_BOTTOM_LEFT_POS = "bottom-left",
+	MXS_BOTTOM_RIGHT_POS = "bottom-right";
+const MXS_FOUR_POSITION = [MXS_TOP_POS, MXS_RIGHT_POS, MXS_BOTTOM_POS, MXS_LEFT_POS];
+	MXS_ORIGINS_POSITIONS = [MXS_TOP_LEFT_POS, MXS_TOP_RIGHT_POS, MXS_CENTER_POS, MXS_BOTTOM_LEFT_POS, MXS_BOTTOM_RIGHT_POS];
+const MXS_FORWARD = "forward",
+	MXS_BACKWARD = "backward";
+const MXS_VERTICAL_DIR = "vertical",
+	MXS_HORIZONTAL_DIR = "horizontal",
+	MXS_SKEW_1_DIR = "skew1";
+	MXS_SKEW_2_DIR = "skew2";
+const MXS_SIMPLE_DIRECTIONS = [MXS_VERTICAL_DIR, MXS_HORIZONTAL_DIR],
+	MXS_ALL_DIRECTIONS = [MXS_VERTICAL_DIR, MXS_HORIZONTAL_DIR, MXS_SKEW_1_DIR, MXS_SKEW_2_DIR];
+const MXS_CONTROLS_PREV_CODE = "&#10094",
+	MXS_CONTROLS_NEXT_CODE = "&#10095",
+	MXS_CONTROLS_PAUSE_CODE = "&#9208",
+	MXS_CONTROLS_PLAY_CODE = "&#9205",
+	MXS_CONTROLS_CLOSE_CODE = "&#10006";
+	MXS_CONTROLS_SQUARE_CODE = "&#11034";
 
 // Transitions
-const SIMPLE_TRANSITION = "simple", CUTTING_TRANSITION = "cutting", SHAPE_TRANSITION = "shape";
-const RANDOM = {
+const MXS_SIMPLE_TRANSITION = "simple", MXS_CUTTING_TRANSITION = "cutting", MXS_SHAPE_TRANSITION = "shape";
+const MXS_RANDOM = {
 		name : "random",
 		constant : false
 	},
-	FADE = {
+	MXS_FADE = {
 		name : "fade",
-		type : SIMPLE_TRANSITION
+		type : MXS_SIMPLE_TRANSITION
 	},
-	SLIDE = {
+	MXS_SLIDE = {
 		name : "slide",
-		type : SIMPLE_TRANSITION,
-		direction : HORIZONTAL_DIR
+		type : MXS_SIMPLE_TRANSITION,
+		direction : MXS_HORIZONTAL_DIR
 	},
-	SLICES = {
+	MXS_SLICES = {
 		name : "slices",
-		type : CUTTING_TRANSITION,
-		direction : HORIZONTAL_DIR,
+		type : MXS_CUTTING_TRANSITION,
+		direction : MXS_HORIZONTAL_DIR,
 		count : 4
 	},
-	TILES = {
+	MXS_TILES = {
 		name : "tiles",
-		type : CUTTING_TRANSITION,
+		type : MXS_CUTTING_TRANSITION,
 		count : 16,
 		random : false
 	},
-	CIRCLE = {
+	MXS_CIRCLE = {
 		name : "circle",
-		type : SHAPE_TRANSITION,
+		type : MXS_SHAPE_TRANSITION,
 		origin : "center"
 	},
-	SQUARE = {
+	MXS_SQUARE = {
 		name : "square",
-		type : SHAPE_TRANSITION,
+		type : MXS_SHAPE_TRANSITION,
 		origin : "center"
 	};
-const TRANSITIONS = [FADE, SLIDE, SLICES, TILES, CIRCLE, SQUARE];
+const MXS_TRANSITIONS = [MXS_FADE, MXS_SLIDE, MXS_SLICES, MXS_TILES, MXS_CIRCLE, MXS_SQUARE];
 function getTransition(name){
 	let transition = null;
-	for (var i = 0; (i < TRANSITIONS.length && TRANSITIONS[i].name != name); i++);
-	if(i < TRANSITIONS.length)
-		transition = TRANSITIONS[i];
+	for (var i = 0; (i < MXS_TRANSITIONS.length && MXS_TRANSITIONS[i].name != name); i++);
+	if(i < MXS_TRANSITIONS.length)
+		transition = MXS_TRANSITIONS[i];
 	return transition;	
 }
 function chooseTransition(){
-	let transition = TRANSITIONS[Math.round(Math.random() * (TRANSITIONS.length-1))];
-	if(transition.type == SHAPE_TRANSITION){
-		transition.origin = ORIGINS_POSITIONS[Math.round(Math.random() * (ORIGINS_POSITIONS.length-1))];
-	}else if(transition.name == TILES.name){
+	let transition = MXS_TRANSITIONS[Math.round(Math.random() * (MXS_TRANSITIONS.length-1))];
+	if(transition.type == MXS_SHAPE_TRANSITION){
+		transition.origin = MXS_ORIGINS_POSITIONS[Math.round(Math.random() * (MXS_ORIGINS_POSITIONS.length-1))];
+	}else if(transition.name == MXS_TILES.name){
 		transition.random = (Math.round(Math.random()) == 0) ? false : true;
-	}else if(transition.name == SLICES.name || transition.name == SLIDE.name){
-		transition.direction = SIMPLE_DIRECTIONS[Math.round(Math.random())];
+	}else if(transition.name == MXS_SLICES.name || transition.name == MXS_SLIDE.name){
+		transition.direction = MXS_SIMPLE_DIRECTIONS[Math.round(Math.random())];
 	}
 	return transition;
 }
@@ -98,15 +98,15 @@ function chooseTransition(){
 			autoplay : true,
 			controls : {
 				active :false,
-				position : TOP_POS
+				position : MXS_TOP_POS
 			},
 			thumbs : {
 				active : false,
-				position : BOTTOM_POS
+				position : MXS_BOTTOM_POS
 			},
 			labels:{
 				active:true,
-				position:TOP_LEFT_POS
+				position:MXS_TOP_LEFT_POS
 			}
 		};
 
@@ -114,10 +114,10 @@ function chooseTransition(){
 		//Checking the integrity of the parameters
 		options.animation.speed = options.animation.speed*1000;
 		options.animation.delay = options.animation.delay*1000;
-		if(options.transition.name != RANDOM.name){
+		if(options.transition.name != MXS_RANDOM.name){
 			let choosed_transition = getTransition(options.transition.name);
 			if(choosed_transition == null)
-				options.transition = FADE;
+				options.transition = MXS_FADE;
 			else
 				options.transition = $.extend(true, choosed_transition, options.transition);
 		}else{
@@ -129,9 +129,9 @@ function chooseTransition(){
 		let $obj = $(this), timer;
 		this.each(function(){
 			//Update object data
+			$obj.addClass('mixSlide-frame').css('z-index', '100');
 			$obj.data("mixSlide-options", options);
 			$obj.mixSlideData('animated', options.autoplay);
-			$obj.addClass('mixSlide-frame');
 			if(options.fullscreen){
 				$obj.addClass('fullscreen');
 			}
@@ -168,9 +168,9 @@ function chooseTransition(){
 				$container.find('#mixSlide-thumbs span').click(function(){
 					let indexImage = parseInt($(this).attr('data-image-index'));
 					if(indexImage > currentImageIndex)
-						changeImage(FORWARD, indexImage);
+						changeImage(MXS_FORWARD, indexImage);
 					else if(indexImage < currentImageIndex)
-						changeImage(BACKWARD, indexImage);
+						changeImage(MXS_BACKWARD, indexImage);
 				});
 			}
 
@@ -181,16 +181,16 @@ function chooseTransition(){
 			if(options.controls){
 				let controls_code = '\
 					<div id="mixSlide-slide-buttons">\
-						<span id="mixSlide-prev">'+CONTROLS_PREV_CODE+'</span>\
-						<span id="mixSlide-next">'+CONTROLS_NEXT_CODE+'</span>\
-						<span id="mixSlide-start-slide">'+CONTROLS_PLAY_CODE+'</span>\
-						<span id="mixSlide-open-close-fullscreen">'+CONTROLS_SQUARE_CODE+'</span>\
+						<span id="mixSlide-prev">'+MXS_CONTROLS_PREV_CODE+'</span>\
+						<span id="mixSlide-next">'+MXS_CONTROLS_NEXT_CODE+'</span>\
+						<span id="mixSlide-start-slide">'+MXS_CONTROLS_PLAY_CODE+'</span>\
+						<span id="mixSlide-open-close-fullscreen">'+MXS_CONTROLS_SQUARE_CODE+'</span>\
 					</div>';
 				$controls.append(controls_code);
 				if($obj.mixSlideData('animated'))
-					$controls.find('#mixSlide-start-slide').html(CONTROLS_PAUSE_CODE);
+					$controls.find('#mixSlide-start-slide').html(MXS_CONTROLS_PAUSE_CODE);
 				if(options.fullscreen){
-					$controls.find('#mixSlide-open-close-fullscreen').html(CONTROLS_CLOSE_CODE);
+					$controls.find('#mixSlide-open-close-fullscreen').html(MXS_CONTROLS_CLOSE_CODE);
 				}
 				if(!options.thumbs.active){
 					let points_code = '<div id="mixSlide-points">';
@@ -202,29 +202,29 @@ function chooseTransition(){
 					$controls.find('#mixSlide-points span').click(function(){
 						let indexImage = parseInt($(this).attr('data-image-index'));
 						if(indexImage > currentImageIndex)
-							changeImage(FORWARD, indexImage);
+							changeImage(MXS_FORWARD, indexImage);
 						else if(indexImage < currentImageIndex)
-							changeImage(BACKWARD, indexImage);
+							changeImage(MXS_BACKWARD, indexImage);
 					});
 				}
-				$controls.find('#mixSlide-prev').click(function(){changeImage(BACKWARD);});
-				$controls.find('#mixSlide-next').click(function(){changeImage(FORWARD);});
+				$controls.find('#mixSlide-prev').click(function(){changeImage(MXS_BACKWARD);});
+				$controls.find('#mixSlide-next').click(function(){changeImage(MXS_FORWARD);});
 				$controls.find('#mixSlide-start-slide').click(function(){
 					if($obj.mixSlideData('animated')){
 						stopAnimation();
-						$(this).html(CONTROLS_PLAY_CODE);
+						$(this).html(MXS_CONTROLS_PLAY_CODE);
 					}else{
 						launchAnimation();
-						$(this).html(CONTROLS_PAUSE_CODE);
+						$(this).html(MXS_CONTROLS_PAUSE_CODE);
 					}
 				});
 				$controls.find('#mixSlide-open-close-fullscreen').click(function(){
 					if($obj.mixSlideData('fullscreen')){
 						$obj.mixSlideData('fullscreen', false);
-						$(this).html(CONTROLS_SQUARE_CODE);
+						$(this).html(MXS_CONTROLS_SQUARE_CODE);
 					}else{
 						$obj.mixSlideData('fullscreen', true);
-						$(this).html(CONTROLS_CLOSE_CODE);
+						$(this).html(MXS_CONTROLS_CLOSE_CODE);
 					}
 				});
 			}
@@ -232,18 +232,18 @@ function chooseTransition(){
 
 			let transition = options.transition;
 			function changeImage(dir, nextImageIndex = -1, isAutomatic = false){
-				if(options.transition.name == RANDOM.name){
+				if(options.transition.name == MXS_RANDOM.name){
 					transition = chooseTransition();
 				}
 				if(nextImageIndex == -1){
 					nextImageIndex = currentImageIndex+1;
-					if(dir == BACKWARD){
+					if(dir == MXS_BACKWARD){
 						nextImageIndex = currentImageIndex-1;
 						if(nextImageIndex < 0){
 							nextImageIndex = lastImageIndex;
 						}
 					}
-					if(dir == FORWARD && nextImageIndex > lastImageIndex){
+					if(dir == MXS_FORWARD && nextImageIndex > lastImageIndex){
 						nextImageIndex = 0;
 					}
 				}
@@ -254,31 +254,31 @@ function chooseTransition(){
 				//Variables for animation
 				let currentTemp = currentImageIndex, nextTemp = nextImageIndex;
 				//Simple transition
-				if(transition.type == SIMPLE_TRANSITION)
+				if(transition.type == MXS_SIMPLE_TRANSITION)
 				{
 					//Fade Transition
-					if(transition.name == FADE.name)
+					if(transition.name == MXS_FADE.name)
 					{
 						$imageDivs.eq(nextTemp).css("z-index", "1").fadeIn(options.animation.speed);
 						$imageDivs.eq(currentTemp).fadeOut(options.animation.speed).css("z-index", "0");
 					}
 					//Slide Transition
-					else if(transition.name == SLIDE.name)
+					else if(transition.name == MXS_SLIDE.name)
 					{
 						let animated_property_forward = {left:"-100%"},
 							animated_property_backward = {left:"0"};
-						if(transition.direction == VERTICAL_DIR){
+						if(transition.direction == MXS_VERTICAL_DIR){
 							animated_property_forward.left = "0";
 							animated_property_forward.top = "-100%";
 							animated_property_backward.top = "0";
-						}else if(transition.direction == SKEW_1_DIR){
+						}else if(transition.direction == MXS_SKEW_1_DIR){
 							animated_property_forward.top = "-100%";
 							animated_property_backward.top = "0";
-						}else if(transition.direction == SKEW_2_DIR){
+						}else if(transition.direction == MXS_SKEW_2_DIR){
 							animated_property_forward.bottom = "-100%";
 							animated_property_backward.bottom = "0";
 						}
-						if(dir == FORWARD){
+						if(dir == MXS_FORWARD){
 							$imageDivs.eq(nextTemp).show(-1);
 							$imageDivs.eq(currentTemp).animate(animated_property_forward, 
 								options.animation.speed, function(){
@@ -298,19 +298,19 @@ function chooseTransition(){
 					}
 				}
 				//Cutting transition
-				else if(transition.type == CUTTING_TRANSITION)
+				else if(transition.type == MXS_CUTTING_TRANSITION)
 				{
 					$images.find('#mixSlide-div-over').remove();
 					$images.append('<div id="mixSlide-div-over"></div>');
 					let $divOver = $images.find('#mixSlide-div-over'),
-						imageIndex = (dir == FORWARD) ? currentTemp : nextTemp;
+						imageIndex = (dir == MXS_FORWARD) ? currentTemp : nextTemp;
 					//Slices transition
-					if(transition.name == SLICES.name)
+					if(transition.name == MXS_SLICES.name)
 					{
 						let animated_even_forward = {left:"-100%"},
 							animated_odd_forward = {left:"100%"},
 							animated_backward = {left:"0"};
-						if(transition.direction == VERTICAL_DIR){
+						if(transition.direction == MXS_VERTICAL_DIR){
 							animated_even_forward = {top:"-100%"};
 							animated_odd_forward = {top:"100%"};
 							animated_backward = {top:"0"};
@@ -326,12 +326,12 @@ function chooseTransition(){
 						let size = (100/transition.count);
 						$divOver.find('div').each(function(){
 							let number = parseInt($(this).attr('data-number'));
-							if(transition.direction == HORIZONTAL_DIR)
+							if(transition.direction == MXS_HORIZONTAL_DIR)
 								clipSquare($(this), 0, number*size, 100, size);
 							else
 								clipSquare($(this), number*size, 0, size, 100);
 							
-							if(dir == FORWARD){
+							if(dir == MXS_FORWARD){
 								$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
 								$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
 								if(number%2 == 0){
@@ -354,7 +354,7 @@ function chooseTransition(){
 						});
 					}
 					//Tiles transition
-					else if(transition.name == TILES.name)
+					else if(transition.name == MXS_TILES.name)
 					{
 						let animated_forward = {}, 
 							animated_backward = {left:"0", top:"0"},
@@ -390,7 +390,7 @@ function chooseTransition(){
 								let $element = $divOver.find('div[data-number="'+element_number+'"]');
 								animated_forward.left = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
 								animated_forward.top = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
-								if(dir == FORWARD){
+								if(dir == MXS_FORWARD){
 									$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
 									$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
 									$element.animate(animated_forward, unitSpeed*(number+1));
@@ -412,7 +412,7 @@ function chooseTransition(){
 						else
 						{ 
 							let number = 0, $element;
-							if(dir == FORWARD){
+							if(dir == MXS_FORWARD){
 								$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
 								$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
 							}
@@ -421,7 +421,7 @@ function chooseTransition(){
 							for(let i = 0;i<sqrt_count;i++){
 								for(let j = 0;j<sqrt_count;j++){
 									$element = $divOver.find('div[data-x="'+i+'"][data-y="'+j+'"]');
-									if(dir == FORWARD){
+									if(dir == MXS_FORWARD){
 										$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
 										$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
 										$element.animate(animated_forward, unitSpeed*(number+1));
@@ -443,26 +443,26 @@ function chooseTransition(){
 					}
 				}
 				//Shape transition
-				else if(transition.type == SHAPE_TRANSITION)
+				else if(transition.type == MXS_SHAPE_TRANSITION)
 				{
 					let origin,  x = 50, y = 50, radius = 70;
-					if(transition.origin != CENTER_POS)
-						if(transition.name == CIRCLE.name)
+					if(transition.origin != MXS_CENTER_POS)
+						if(transition.name == MXS_CIRCLE.name)
 							radius = 150;
 						else
 							radius = 100;
 					switch(transition.origin){
-						case TOP_LEFT_POS: x = 0, y = 0;break;
-						case TOP_RIGHT_POS: x = 100, y =  0;break;
-						case BOTTOM_LEFT_POS: x = 0, y =  100;break;
-						case BOTTOM_RIGHT_POS: x = 100, y = 100;break;
+						case MXS_TOP_LEFT_POS: x = 0, y = 0;break;
+						case MXS_TOP_RIGHT_POS: x = 100, y =  0;break;
+						case MXS_BOTTOM_LEFT_POS: x = 0, y =  100;break;
+						case MXS_BOTTOM_RIGHT_POS: x = 100, y = 100;break;
 					}
 					origin = x+"% "+y+"%";
 					//Circle transition
-					if(transition.name == CIRCLE.name)
+					if(transition.name == MXS_CIRCLE.name)
 					{
 						
-						if(dir == FORWARD){
+						if(dir == MXS_FORWARD){
 							$imageDivs.eq(nextTemp).css({"clip-path":"circle(0% at "+origin+")", "z-index":"1"}).show(-1);
 							$imageDivs.eq(currentTemp).css({"z-index":"0"});
 							$imageDivs.eq(nextTemp).animate(
@@ -498,10 +498,10 @@ function chooseTransition(){
 						}
 					}
 					//Square transition
-					else if(transition.name == SQUARE.name)
+					else if(transition.name == MXS_SQUARE.name)
 					{
 						let x_m, x_p, y_m, y_p;
-						if(dir == FORWARD){
+						if(dir == MXS_FORWARD){
 							$imageDivs.eq(nextTemp).css({
 								"clip-path":"polygon("+x+"% "+y+"%, "+x+"% "+y+"%, "+x+"% "+y+"%, "+x+"% "+y+"%)",
 								"z-index":"1"
@@ -554,7 +554,7 @@ function chooseTransition(){
 			}
 			refresh();
 			function animation(){
-				changeImage(FORWARD, -1, true);
+				changeImage(MXS_FORWARD, -1, true);
 			}
 			function launchAnimation(){
 				timer = setInterval(animation, options.animation.delay+options.animation.speed);
