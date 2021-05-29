@@ -98,6 +98,7 @@ function chooseTransition(){
 			autoplay : true,
 			controls : {
 				active :false,
+				minimal:false,
 				position : MXS_TOP_POS
 			},
 			thumbs : {
@@ -145,10 +146,10 @@ function chooseTransition(){
 					label : $imageDivs.eq(i).find('p').text()
 				});
 			}
-			$obj.find('.mixSlide-image').wrapAll('<div id="mixSlide-images"></div>');
-			$obj.find('#mixSlide-images').wrap('<div id="mixSlide-container"></div>');
-			let $container = $obj.find('#mixSlide-container'),
-				$images = $container.find('#mixSlide-images');
+			$obj.find('.mixSlide-image').wrapAll('<div class="mixSlide-images"></div>');
+			$obj.find('.mixSlide-images').wrap('<div class="mixSlide-container"></div>');
+			let $container = $obj.find('.mixSlide-container'),
+				$images = $container.find('.mixSlide-images');
 			$imageDivs.css('z-index','0').hide(-1);
 			$imageDivs.eq(0).show(-1).css('z-index','1');
 			let currentImageIndex = 0,
@@ -159,13 +160,13 @@ function chooseTransition(){
 				$images.find('p').hide(-1);
 			}
 			if(options.thumbs.active){
-				let thumbs_code = '<div id="mixSlide-thumbs" class="'+options.thumbs.position+'">';
+				let thumbs_code = '<div class="mixSlide-thumbs '+options.thumbs.position+'">';
 				for(let i = 0; i < images.length; i++){
 					thumbs_code += '<span class="mixSlide-thumb"data-image-index="'+i+'"><img src="'+images[i].src+'"/></span>';
 				}
 				thumbs_code += "</div>";
 				$container.append(thumbs_code);
-				$container.find('#mixSlide-thumbs span').click(function(){
+				$container.find('.mixSlide-thumbs span').click(function(){
 					let indexImage = parseInt($(this).attr('data-image-index'));
 					if(indexImage > currentImageIndex)
 						changeImage(MXS_FORWARD, indexImage);
@@ -174,32 +175,36 @@ function chooseTransition(){
 				});
 			}
 
-			$container.append('<div id="mixSlide-controls" class="'+options.controls.position+'"></div>');
-			let $controls = $container.find("#mixSlide-controls");
+			$container.append('<div class="mixSlide-controls '+options.controls.position+'"></div>');
+			let $controls = $container.find(".mixSlide-controls");
 
 			//Controls buttons
 			if(options.controls){
-				let controls_code = '\
-					<div id="mixSlide-slide-buttons">\
-						<span id="mixSlide-prev">'+MXS_CONTROLS_PREV_CODE+'</span>\
-						<span id="mixSlide-next">'+MXS_CONTROLS_NEXT_CODE+'</span>\
-						<span id="mixSlide-start-slide">'+MXS_CONTROLS_PLAY_CODE+'</span>\
-						<span id="mixSlide-open-close-fullscreen">'+MXS_CONTROLS_SQUARE_CODE+'</span>\
-					</div>';
-				$controls.append(controls_code);
+				if(!options.controls.minimal){
+					let controls_code = '\
+						<div class="mixSlide-slide-buttons">\
+							<span class="mixSlide-prev">'+MXS_CONTROLS_PREV_CODE+'</span>\
+							<span class="mixSlide-next">'+MXS_CONTROLS_NEXT_CODE+'</span>\
+							<span class="mixSlide-start-slide">'+MXS_CONTROLS_PLAY_CODE+'</span>\
+							<span class="mixSlide-open-close-fullscreen">'+MXS_CONTROLS_SQUARE_CODE+'</span>\
+						</div>';
+					$controls.append(controls_code);
+				}else{
+					$controls.addClass("minimal");
+				}
 				if($obj.mixSlideData('animated'))
-					$controls.find('#mixSlide-start-slide').html(MXS_CONTROLS_PAUSE_CODE);
+					$controls.find('.mixSlide-start-slide').html(MXS_CONTROLS_PAUSE_CODE);
 				if(options.fullscreen){
-					$controls.find('#mixSlide-open-close-fullscreen').html(MXS_CONTROLS_CLOSE_CODE);
+					$controls.find('.mixSlide-open-close-fullscreen').html(MXS_CONTROLS_CLOSE_CODE);
 				}
 				if(!options.thumbs.active){
-					let points_code = '<div id="mixSlide-points">';
+					let points_code = '<div class="mixSlide-points">';
 					for(let i = 0; i < images.length; i++){
 						points_code += '<span class="mixSlide-point"data-image-index="'+i+'"></span>';
 					}
 					points_code += "</div>";
 					$controls.append(points_code);
-					$controls.find('#mixSlide-points span').click(function(){
+					$controls.find('.mixSlide-points span').click(function(){
 						let indexImage = parseInt($(this).attr('data-image-index'));
 						if(indexImage > currentImageIndex)
 							changeImage(MXS_FORWARD, indexImage);
@@ -207,9 +212,9 @@ function chooseTransition(){
 							changeImage(MXS_BACKWARD, indexImage);
 					});
 				}
-				$controls.find('#mixSlide-prev').click(function(){changeImage(MXS_BACKWARD);});
-				$controls.find('#mixSlide-next').click(function(){changeImage(MXS_FORWARD);});
-				$controls.find('#mixSlide-start-slide').click(function(){
+				$controls.find('.mixSlide-prev').click(function(){changeImage(MXS_BACKWARD);});
+				$controls.find('.mixSlide-next').click(function(){changeImage(MXS_FORWARD);});
+				$controls.find('.mixSlide-start-slide').click(function(){
 					if($obj.mixSlideData('animated')){
 						stopAnimation();
 						$(this).html(MXS_CONTROLS_PLAY_CODE);
@@ -218,7 +223,7 @@ function chooseTransition(){
 						$(this).html(MXS_CONTROLS_PAUSE_CODE);
 					}
 				});
-				$controls.find('#mixSlide-open-close-fullscreen').click(function(){
+				$controls.find('.mixSlide-open-close-fullscreen').click(function(){
 					if($obj.mixSlideData('fullscreen')){
 						$obj.mixSlideData('fullscreen', false);
 						$(this).html(MXS_CONTROLS_SQUARE_CODE);
@@ -300,9 +305,9 @@ function chooseTransition(){
 				//Cutting transition
 				else if(transition.type == MXS_CUTTING_TRANSITION)
 				{
-					$images.find('#mixSlide-div-over').remove();
-					$images.append('<div id="mixSlide-div-over"></div>');
-					let $divOver = $images.find('#mixSlide-div-over'),
+					$images.find('.mixSlide-div-over').remove();
+					$images.append('<div class="mixSlide-div-over"></div>');
+					let $divOver = $images.find('.mixSlide-div-over'),
 						imageIndex = (dir == MXS_FORWARD) ? currentTemp : nextTemp;
 					//Slices transition
 					if(transition.name == MXS_SLICES.name)
@@ -547,10 +552,10 @@ function chooseTransition(){
 				refresh();
 			}
 			function refresh(){
-				$controls.find('#mixSlide-points span').removeClass('active');
-				$container.find('#mixSlide-points span').eq(currentImageIndex).addClass('active');
-				$container.find('#mixSlide-thumbs span').removeClass('active');
-				$container.find('#mixSlide-thumbs span').eq(currentImageIndex).addClass('active');
+				$controls.find('.mixSlide-points span').removeClass('active');
+				$container.find('.mixSlide-points span').eq(currentImageIndex).addClass('active');
+				$container.find('.mixSlide-thumbs span').removeClass('active');
+				$container.find('.mixSlide-thumbs span').eq(currentImageIndex).addClass('active');
 			}
 			refresh();
 			function animation(){
