@@ -1,5 +1,13 @@
 
 //Plug-in constants
+//LAyouts
+const MXS_LAYOUT_1 = 1, MXS_LAYOUT_2 = 2, MXS_LAYOUT_3 = 3, MXS_LAYOUT_4 = 4;
+
+//Z-index
+const MXS_Z_INDEX_FRONT = 10,
+	MXS_Z_INDEX_BACK = 8;
+
+// Positions
 const MXS_BOTTOM_POS = "bottom",
 	MXS_TOP_POS = "top",
 	MXS_LEFT_POS = "left",
@@ -11,6 +19,8 @@ const MXS_BOTTOM_POS = "bottom",
 	MXS_BOTTOM_RIGHT_POS = "bottom-right";
 const MXS_FOUR_POSITION = [MXS_TOP_POS, MXS_RIGHT_POS, MXS_BOTTOM_POS, MXS_LEFT_POS];
 	MXS_ORIGINS_POSITIONS = [MXS_TOP_LEFT_POS, MXS_TOP_RIGHT_POS, MXS_CENTER_POS, MXS_BOTTOM_LEFT_POS, MXS_BOTTOM_RIGHT_POS];
+
+//Directions
 const MXS_FORWARD = "forward",
 	MXS_BACKWARD = "backward";
 const MXS_VERTICAL_DIR = "vertical",
@@ -19,6 +29,8 @@ const MXS_VERTICAL_DIR = "vertical",
 	MXS_SKEW_2_DIR = "skew2";
 const MXS_SIMPLE_DIRECTIONS = [MXS_VERTICAL_DIR, MXS_HORIZONTAL_DIR],
 	MXS_ALL_DIRECTIONS = [MXS_VERTICAL_DIR, MXS_HORIZONTAL_DIR, MXS_SKEW_1_DIR, MXS_SKEW_2_DIR];
+
+//Controls
 const MXS_CONTROLS_PREV_CODE = "&#10094",
 	MXS_CONTROLS_NEXT_CODE = "&#10095",
 	MXS_CONTROLS_PAUSE_CODE = "&#9208",
@@ -64,20 +76,29 @@ const MXS_RANDOM = {
 		origin : "center"
 	};
 const MXS_TRANSITIONS = [MXS_FADE, MXS_SLIDE, MXS_SLICES, MXS_TILES, MXS_CIRCLE, MXS_SQUARE];
-function getTransition(name){
+
+function getTransition(name)
+{
 	let transition = null;
 	for (var i = 0; (i < MXS_TRANSITIONS.length && MXS_TRANSITIONS[i].name != name); i++);
 	if(i < MXS_TRANSITIONS.length)
 		transition = MXS_TRANSITIONS[i];
 	return transition;	
 }
-function chooseTransition(){
+
+function chooseTransition()
+{
 	let transition = MXS_TRANSITIONS[Math.round(Math.random() * (MXS_TRANSITIONS.length-1))];
-	if(transition.type == MXS_SHAPE_TRANSITION){
+	if(transition.type == MXS_SHAPE_TRANSITION)
+	{
 		transition.origin = MXS_ORIGINS_POSITIONS[Math.round(Math.random() * (MXS_ORIGINS_POSITIONS.length-1))];
-	}else if(transition.name == MXS_TILES.name){
+	}
+	else if(transition.name == MXS_TILES.name)
+	{
 		transition.random = (Math.round(Math.random()) == 0) ? false : true;
-	}else if(transition.name == MXS_SLICES.name || transition.name == MXS_SLIDE.name){
+	}
+	else if(transition.name == MXS_SLICES.name || transition.name == MXS_SLIDE.name)
+	{
 		transition.direction = MXS_SIMPLE_DIRECTIONS[Math.round(Math.random())];
 	}
 	return transition;
@@ -95,92 +116,90 @@ function chooseTransition(){
 			transition : {
 				name : "fade"
 			},
-			autoplay : true,
-			controls : {
-				active :false,
-				minimal:false,
-				position : MXS_TOP_POS
-			},
-			thumbs : {
-				active : false,
-				position : MXS_BOTTOM_POS
-			},
-			labels:{
-				active:true,
-				position:MXS_TOP_LEFT_POS
-			}
+			autoplay : false,
+			controls : true,
+			minimal_control:false,
+			thumbs : false,
+			labels:true
 		};
 
 		let options = $.extend(true, defaults, opt);
 		//Checking the integrity of the parameters
 		options.animation.speed = options.animation.speed*1000;
 		options.animation.delay = options.animation.delay*1000;
-		if(options.transition.name != MXS_RANDOM.name){
+
+		if(options.transition.name != MXS_RANDOM.name)
+		{
 			let choosed_transition = getTransition(options.transition.name);
 			if(choosed_transition == null)
 				options.transition = MXS_FADE;
 			else
 				options.transition = $.extend(true, choosed_transition, options.transition);
-		}else{
+		}
+		else
+		{
 			if(options.transition.constant){
 				options.transition = chooseTransition();
 			}
 		}
 		//End checking
-		let $obj = $(this), timer;
 		this.each(function(){
+			let $obj = $(this), timer;
+			/*
+
+					Définitions des éléments
+
+			*/
 			//Update object data
-			$obj.addClass('mixSlide-frame').css('z-index', '100');
+			$obj.addClass('mixSlide-frame');
 			$obj.data("mixSlide-options", options);
 			$obj.mixSlideData('animated', options.autoplay);
+
 			if(options.fullscreen){
 				$obj.addClass('fullscreen');
 			}
 			let images = [];
 			let $imageDivs = $obj.find('div');
-			//Retrive images and labels
-			for(let i = 0;i<$imageDivs.length;i++){
+			//Retrieve images and labels
+			for(let i = 0;i<$imageDivs.length;i++)
+			{
 				$imageDivs.eq(i).addClass("mixSlide-image");
 				images.push({
 					src:$imageDivs.eq(i).find('img').attr('src'),
 					label : $imageDivs.eq(i).find('p').text()
 				});
 			}
+			$obj.data("images", images);
 			$obj.find('.mixSlide-image').wrapAll('<div class="mixSlide-images"></div>');
 			$obj.find('.mixSlide-images').wrap('<div class="mixSlide-container"></div>');
 			let $container = $obj.find('.mixSlide-container'),
 				$images = $container.find('.mixSlide-images');
-			$imageDivs.css('z-index','0').hide(-1);
-			$imageDivs.eq(0).show(-1).css('z-index','1');
+			$imageDivs.css('z-index', MXS_Z_INDEX_BACK).hide(-1);
+			$imageDivs.eq(0).show(-1).css('z-index', MXS_Z_INDEX_FRONT);
 			let currentImageIndex = 0,
 				lastImageIndex = images.length - 1;
-			if(options.labels.active){
-				$images.find('p').addClass(options.labels.position);
+
+			if(options.labels){
+				$images.find('p').show(-1);
 			}else{
 				$images.find('p').hide(-1);
 			}
-			if(options.thumbs.active){
-				let thumbs_code = '<div class="mixSlide-thumbs '+options.thumbs.position+'">';
+			if(options.thumbs){
+				let thumbs_code = '<div class="mixSlide-thumbs">';
 				for(let i = 0; i < images.length; i++){
 					thumbs_code += '<span class="mixSlide-thumb"data-image-index="'+i+'"><img src="'+images[i].src+'"/></span>';
 				}
 				thumbs_code += "</div>";
 				$container.append(thumbs_code);
-				$container.find('.mixSlide-thumbs span').click(function(){
-					let indexImage = parseInt($(this).attr('data-image-index'));
-					if(indexImage > currentImageIndex)
-						changeImage(MXS_FORWARD, indexImage);
-					else if(indexImage < currentImageIndex)
-						changeImage(MXS_BACKWARD, indexImage);
-				});
 			}
 
-			$container.append('<div class="mixSlide-controls '+options.controls.position+'"></div>');
+			$container.append('<div class="mixSlide-controls"></div>');
 			let $controls = $container.find(".mixSlide-controls");
 
 			//Controls buttons
-			if(options.controls){
-				if(!options.controls.minimal){
+			if(options.controls)
+			{
+				if(!options.minimal_controls){
 					let controls_code = '\
 						<div class="mixSlide-slide-buttons">\
 							<span class="mixSlide-prev">'+MXS_CONTROLS_PREV_CODE+'</span>\
@@ -196,22 +215,62 @@ function chooseTransition(){
 					$controls.find('.mixSlide-start-slide').html(MXS_CONTROLS_PAUSE_CODE);
 				if(options.fullscreen){
 					$controls.find('.mixSlide-open-close-fullscreen').html(MXS_CONTROLS_CLOSE_CODE);
+					$obj.mixSlideData('fullscreen', true);
+				}else{
+					$obj.mixSlideData('fullscreen', false);
 				}
-				if(!options.thumbs.active){
+				if(!options.thumbs){
 					let points_code = '<div class="mixSlide-points">';
 					for(let i = 0; i < images.length; i++){
 						points_code += '<span class="mixSlide-point"data-image-index="'+i+'"></span>';
 					}
 					points_code += "</div>";
 					$controls.append(points_code);
-					$controls.find('.mixSlide-points span').click(function(){
+					
+				}				
+			}
+
+			switch(options.layout)
+			{
+				case MXS_LAYOUT_1:
+					$controls.addClass("top-right");
+					$container.find('.mixSlide-thumbs').addClass("bottom");
+					$images.find('p').addClass("left");
+					if(options.thumbs) $images.find('p').addClass("top");
+					else $images.find('p').addClass("bottom");
+				break;
+				case MXS_LAYOUT_2:
+					$controls.addClass("bottom-right");
+					$container.find('.mixSlide-thumbs').addClass("top");
+					$images.find('p').addClass("left");
+					if(options.thumbs) $images.find('p').addClass("bottom");
+					else $images.find('p').addClass("top");
+				break;
+				case MXS_LAYOUT_3:
+					$controls.addClass("bottom-right");
+					$container.find('.mixSlide-thumbs').addClass("top-left");
+					$images.find('p').addClass("top-right");
+				break;
+				default:
+					$controls.addClass("top-left");
+					$container.find('.mixSlide-thumbs').addClass("top-right");
+					$images.find('p').addClass("bottom-left");
+				break;
+			}
+
+			/*
+
+				ACTIONS
+			*/
+			if(options.controls)
+			{
+				$controls.find('.mixSlide-points span').click(function(){
 						let indexImage = parseInt($(this).attr('data-image-index'));
 						if(indexImage > currentImageIndex)
 							changeImage(MXS_FORWARD, indexImage);
 						else if(indexImage < currentImageIndex)
 							changeImage(MXS_BACKWARD, indexImage);
 					});
-				}
 				$controls.find('.mixSlide-prev').click(function(){changeImage(MXS_BACKWARD);});
 				$controls.find('.mixSlide-next').click(function(){changeImage(MXS_FORWARD);});
 				$controls.find('.mixSlide-start-slide').click(function(){
@@ -233,10 +292,20 @@ function chooseTransition(){
 					}
 				});
 			}
-
+			if(options.thumbs)
+			{
+				$container.find('.mixSlide-thumbs span').click(function(){
+					let indexImage = parseInt($(this).attr('data-image-index'));
+					if(indexImage > currentImageIndex)
+						changeImage(MXS_FORWARD, indexImage);
+					else if(indexImage < currentImageIndex)
+						changeImage(MXS_BACKWARD, indexImage);
+				});
+			}
 
 			let transition = options.transition;
-			function changeImage(dir, nextImageIndex = -1, isAutomatic = false){
+			function changeImage(dir, nextImageIndex = -1, isAutomatic = false)
+			{
 				if(options.transition.name == MXS_RANDOM.name){
 					transition = chooseTransition();
 				}
@@ -264,8 +333,8 @@ function chooseTransition(){
 					//Fade Transition
 					if(transition.name == MXS_FADE.name)
 					{
-						$imageDivs.eq(nextTemp).css("z-index", "1").fadeIn(options.animation.speed);
-						$imageDivs.eq(currentTemp).fadeOut(options.animation.speed).css("z-index", "0");
+						$imageDivs.eq(nextTemp).css("z-index", MXS_Z_INDEX_FRONT).fadeIn(options.animation.speed);
+						$imageDivs.eq(currentTemp).fadeOut(options.animation.speed).css("z-index", MXS_Z_INDEX_BACK);
 					}
 					//Slide Transition
 					else if(transition.name == MXS_SLIDE.name)
@@ -287,13 +356,13 @@ function chooseTransition(){
 							$imageDivs.eq(nextTemp).show(-1);
 							$imageDivs.eq(currentTemp).animate(animated_property_forward, 
 								options.animation.speed, function(){
-									$(this).css({"z-index":"0"}).css(animated_property_backward).hide(-1);
-									$imageDivs.eq(nextTemp).css("z-index", "1");
+									$(this).css({"z-index":MXS_Z_INDEX_BACK}).css(animated_property_backward).hide(-1);
+									$imageDivs.eq(nextTemp).css("z-index", MXS_Z_INDEX_FRONT);
 								}
 							);
 						}else{
-							$imageDivs.eq(currentTemp).css({"z-index":"0"});
-							$imageDivs.eq(nextTemp).css(animated_property_forward).css({"z-index":"1"}).show(-1);
+							$imageDivs.eq(currentTemp).css({"z-index":MXS_Z_INDEX_BACK});
+							$imageDivs.eq(nextTemp).css(animated_property_forward).css({"z-index":MXS_Z_INDEX_FRONT}).show(-1);
 							$imageDivs.eq(nextTemp).animate(animated_property_backward, 
 								options.animation.speed, function(){
 									$imageDivs.eq(currentTemp).hide(-1);
@@ -337,8 +406,8 @@ function chooseTransition(){
 								clipSquare($(this), number*size, 0, size, 100);
 							
 							if(dir == MXS_FORWARD){
-								$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
-								$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
+								$imageDivs.eq(nextTemp).css("z-index", MXS_Z_INDEX_FRONT).show(-1);
+								$imageDivs.eq(currentTemp).hide(-1).css("z-index", MXS_Z_INDEX_BACK);
 								if(number%2 == 0){
 									$(this).animate(animated_even_forward, options.animation.speed);
 								}else{
@@ -351,8 +420,8 @@ function chooseTransition(){
 								}else{
 									$(this).css(animated_odd_forward);
 									$(this).animate(animated_backward, options.animation.speed, function(){
-										$imageDivs.eq(currentTemp).css({"z-index":"0"}).hide(-1);
-										$imageDivs.eq(nextTemp).css({"z-index":"1"}).show(-1);
+										$imageDivs.eq(currentTemp).css({"z-index":MXS_Z_INDEX_BACK}).hide(-1);
+										$imageDivs.eq(nextTemp).css({"z-index":MXS_Z_INDEX_FRONT}).show(-1);
 									});
 								}
 							}
@@ -396,15 +465,15 @@ function chooseTransition(){
 								animated_forward.left = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
 								animated_forward.top = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
 								if(dir == MXS_FORWARD){
-									$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
-									$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
+									$imageDivs.eq(nextTemp).css("z-index", MXS_Z_INDEX_FRONT).show(-1);
+									$imageDivs.eq(currentTemp).hide(-1).css("z-index", MXS_Z_INDEX_BACK);
 									$element.animate(animated_forward, unitSpeed*(number+1));
 								}else{
 									$element.css(animated_forward);
 									if(number == transition.count-1){
 										$element.animate(animated_backward, unitSpeed*(number+1), function(){
-											$imageDivs.eq(currentTemp).css({"z-index":"0"}).hide(-1);
-											$imageDivs.eq(nextTemp).css({"z-index":"1"}).show(-1);
+											$imageDivs.eq(currentTemp).css({"z-index": MXS_Z_INDEX_BACK}).hide(-1);
+											$imageDivs.eq(nextTemp).css({"z-index":MXS_Z_INDEX_FRONT}).show(-1);
 										});
 									}else{
 										$element.animate(animated_backward, unitSpeed*(number+1));
@@ -418,8 +487,8 @@ function chooseTransition(){
 						{ 
 							let number = 0, $element;
 							if(dir == MXS_FORWARD){
-								$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
-								$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
+								$imageDivs.eq(nextTemp).css("z-index", MXS_Z_INDEX_FRONT).show(-1);
+								$imageDivs.eq(currentTemp).hide(-1).css("z-index", MXS_Z_INDEX_BACK);
 							}
 							animated_forward.left = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
 							animated_forward.top = (Math.floor(Math.random()*2) == 0) ? '-100%' : '100%';
@@ -427,15 +496,15 @@ function chooseTransition(){
 								for(let j = 0;j<sqrt_count;j++){
 									$element = $divOver.find('div[data-x="'+i+'"][data-y="'+j+'"]');
 									if(dir == MXS_FORWARD){
-										$imageDivs.eq(nextTemp).css("z-index", "1").show(-1);
-										$imageDivs.eq(currentTemp).hide(-1).css("z-index", "0");
+										$imageDivs.eq(nextTemp).css("z-index", MXS_Z_INDEX_FRONT).show(-1);
+										$imageDivs.eq(currentTemp).hide(-1).css("z-index", MXS_Z_INDEX_BACK);
 										$element.animate(animated_forward, unitSpeed*(number+1));
 									}else{
 										$element.css(animated_forward);
 										if(number == transition.count-1){
 											$element.animate(animated_backward, unitSpeed*(number+1), function(){
-												$imageDivs.eq(currentTemp).css({"z-index":"0"}).hide(-1);
-												$imageDivs.eq(nextTemp).css({"z-index":"1"}).show(-1);
+												$imageDivs.eq(currentTemp).css({"z-index":MXS_Z_INDEX_BACK}).hide(-1);
+												$imageDivs.eq(nextTemp).css({"z-index":MXS_Z_INDEX_FRONT}).show(-1);
 											});
 										}else{
 											$element.animate(animated_backward, unitSpeed*(number+1));
@@ -468,8 +537,8 @@ function chooseTransition(){
 					{
 						
 						if(dir == MXS_FORWARD){
-							$imageDivs.eq(nextTemp).css({"clip-path":"circle(0% at "+origin+")", "z-index":"1"}).show(-1);
-							$imageDivs.eq(currentTemp).css({"z-index":"0"});
+							$imageDivs.eq(nextTemp).css({"clip-path":"circle(0% at "+origin+")", "z-index":MXS_Z_INDEX_FRONT}).show(-1);
+							$imageDivs.eq(currentTemp).css({"z-index":MXS_Z_INDEX_BACK});
 							$imageDivs.eq(nextTemp).animate(
 								{step:radius},
 								{
@@ -484,7 +553,7 @@ function chooseTransition(){
 								}
 							);
 						}else{
-							$imageDivs.eq(nextTemp).css({"z-index":"0"}).show(-1);
+							$imageDivs.eq(nextTemp).css({"z-index":MXS_Z_INDEX_BACK}).show(-1);
 							$imageDivs.eq(currentTemp).css('clip-path', 'circle('+radius+'% at '+origin+')')
 							$imageDivs.eq(currentTemp).animate(
 								{step:radius},
@@ -494,8 +563,8 @@ function chooseTransition(){
 										$imageDivs.eq(currentTemp).css({"clip-path":"circle("+(radius-val)+"% at "+origin+")"});
 									},
 									always:function(){
-										$imageDivs.eq(nextTemp).css("z-index", "1");
-										$imageDivs.eq(currentTemp).css({"clip-path":"none","z-index":"0"}).hide(-1).animate({step:0},0);
+										$imageDivs.eq(nextTemp).css("z-index", MXS_Z_INDEX_FRONT);
+										$imageDivs.eq(currentTemp).css({"clip-path":"none","z-index":MXS_Z_INDEX_BACK}).hide(-1).animate({step:0},0);
 										
 									}
 								}
@@ -509,9 +578,9 @@ function chooseTransition(){
 						if(dir == MXS_FORWARD){
 							$imageDivs.eq(nextTemp).css({
 								"clip-path":"polygon("+x+"% "+y+"%, "+x+"% "+y+"%, "+x+"% "+y+"%, "+x+"% "+y+"%)",
-								"z-index":"1"
+								"z-index":MXS_Z_INDEX_FRONT
 							}).show(-1);
-							$imageDivs.eq(currentTemp).css({"z-index":"0"});
+							$imageDivs.eq(currentTemp).css({"z-index":MXS_Z_INDEX_BACK});
 							$imageDivs.eq(nextTemp).animate(
 								{step:radius},
 								{
@@ -527,7 +596,7 @@ function chooseTransition(){
 								}
 							);
 						}else{
-							$imageDivs.eq(nextTemp).css({"z-index":"0"}).show(-1);
+							$imageDivs.eq(nextTemp).css({"z-index":MXS_Z_INDEX_BACK}).show(-1);
 							x_m = x-radius, x_p = x+radius, y_m = y-radius, y_p = y+radius;									
 							$imageDivs.eq(currentTemp).css('clip-path',"polygon("+x_m+"% "+y_m+"%, "+x_p+"% "+y_m+"%, "+x_p+"% "+y_p+"%, "+x_m+"% "+y_p+"%)");
 							$imageDivs.eq(currentTemp).animate(
@@ -539,8 +608,8 @@ function chooseTransition(){
 										$imageDivs.eq(currentTemp).css({"clip-path":"polygon("+x_m+"% "+y_m+"%, "+x_p+"% "+y_m+"%, "+x_p+"% "+y_p+"%, "+x_m+"% "+y_p+"%)"});
 									},
 									always:function(){
-										$imageDivs.eq(nextTemp).css("z-index", "1");
-										$imageDivs.eq(currentTemp).css({"clip-path":"none","z-index":"0"}).hide(-1).animate({step:0},0);
+										$imageDivs.eq(nextTemp).css("z-index", MXS_Z_INDEX_FRONT);
+										$imageDivs.eq(currentTemp).css({"clip-path":"none","z-index":MXS_Z_INDEX_BACK}).hide(-1).animate({step:0},0);
 										
 									}
 								}
@@ -551,21 +620,43 @@ function chooseTransition(){
 				currentImageIndex = nextImageIndex;
 				refresh();
 			}
-			function refresh(){
+			function refresh()
+			{
+				let $current_thumb = $container.find('.mixSlide-thumbs span').eq(currentImageIndex),
+					$thumbs = $container.find('.mixSlide-thumbs');
 				$controls.find('.mixSlide-points span').removeClass('active');
 				$container.find('.mixSlide-points span').eq(currentImageIndex).addClass('active');
-				$container.find('.mixSlide-thumbs span').removeClass('active');
-				$container.find('.mixSlide-thumbs span').eq(currentImageIndex).addClass('active');
+				$thumbs.find('span').removeClass('active');
+				$current_thumb.addClass('active');
+				let scroll = $current_thumb.offset().left - $thumbs.offset().left;
+				if($thumbs.height() > $thumbs.width())
+					scroll = $current_thumb.offset().top - $thumbs.offset().top;
+				console.log($container.find('.mixSlide-thumbs span').eq(0).offset().top)
+				$thumbs.animate(
+					{step:scroll},
+					{
+						duration:500,
+						step:function(val){
+							if($thumbs.height() < $thumbs.width())
+								$thumbs.scrollLeft(val);
+							else
+								$thumbs.scrollTop(val);
+						}
+					}
+				);
 			}
 			refresh();
-			function animation(){
+			function animation()
+			{
 				changeImage(MXS_FORWARD, -1, true);
 			}
-			function launchAnimation(){
+			function launchAnimation()
+			{
 				timer = setInterval(animation, options.animation.delay+options.animation.speed);
 				$obj.mixSlideData('animated', true);
 			}
-			function stopAnimation(){
+			function stopAnimation()
+			{
 				clearInterval(timer);
 				$obj.mixSlideData('animated', false);
 			}
@@ -597,8 +688,12 @@ function chooseTransition(){
 				if(datum == "fullscreen"){
 					if(val){
 						$obj.addClass('fullscreen');
+			
+						$obj.find('.mixSlide-open-close-fullscreen').html(MXS_CONTROLS_CLOSE_CODE);
+				
 					}else{
 						$obj.removeClass('fullscreen');
+						$obj.find('.mixSlide-open-close-fullscreen').html(MXS_CONTROLS_SQUARE_CODE);
 					}
 				}
 				$obj.data("mixSlide-options", mixSlide_options);
@@ -607,5 +702,32 @@ function chooseTransition(){
 			}
 			return this;
 		}
+	}
+
+
+	$.fn.mixSlideOperation = function(operation, val = null){
+		this.each(function(){
+			let $obj = $(this);
+			if(operation == "change"){
+				if(val != null){
+					let position = -1,
+						images = $obj.data("images");
+					for(let i = 0;(i<images.length && position < 0);i++){
+						if(images[i].src == val){
+							position = i;
+						}
+					}
+					console.log(position);
+					if(position > -1){
+						let thumbs = $obj.mixSlideData("thumbs");
+						if(thumbs.active)
+							$obj.find('.mixSlide-thumbs span[data-image-index="'+position+'"]').trigger('click');
+						else
+							$obj.find('.mixSlide-points span[data-image-index="'+position+'"]').trigger('click');
+					}
+				}
+			}
+		});
+		return this;
 	}
 })(jQuery);
