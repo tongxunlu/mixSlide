@@ -75,8 +75,8 @@
 		width:100%;justify-content:center!important;margin-top:-10%!important;
 	}
 	.mixSlide-thumbs{
-		position:absolute;overflow:hidden;padding:10px;z-index:16;
-		margin:0;left:0;
+		position:absolute;padding:10px;z-index:16;
+		margin:0;left:0;overflow: auto;overflow-x:visible!important;
 	}
 	.mixSlide-thumbs.bottom,.mixSlide-thumbs.top{
 		height:var(--thumb-size);width:100%;
@@ -98,7 +98,9 @@
 		.mixSlide-thumbs span:hover,.mixSlide-thumbs span.active{
 			border-color:white;box-shadow:1px 1px 1px black;
 		}
-		.mixSlide-thumbs img{height:100%;}
+		.mixSlide-thumbs span img{
+			height:100%;
+		}
 
 
 /* Animation elements */

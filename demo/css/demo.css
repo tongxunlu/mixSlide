@@ -1,4 +1,18 @@
-body{margin:0;font:1.0em cambria;background:rgb(220,220,220);padding-bottom:50px;}
+body{
+	margin:0;font:1.0em cambria;background:rgb(220,220,220);padding-bottom:50px;
+
+}
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-track{background:linear-gradient(rgb(200,200,200), rgb(130,130,130));}
+::-webkit-scrollbar-thumb{
+	background:rgb(100,100,100);
+	border-radius:20px;
+}
+::-webkit-scrollbar-thumb:hover{
+	background:rgb(85,85,85);
+}
+::-webkit-scrollbar-button{background:black;}
+
 h1{font:bold 25px verdana;padding:10px;background:darkgray;
 	margin:0;margin-bottom:15px;color:white}
 h1 i{color:green;}

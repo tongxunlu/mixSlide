@@ -628,14 +628,17 @@ function chooseTransition()
 				$container.find('.mixSlide-points span').eq(currentImageIndex).addClass('active');
 				$thumbs.find('span').removeClass('active');
 				$current_thumb.addClass('active');
-				let scroll = $current_thumb.offset().left - $thumbs.offset().left;
-				if($thumbs.height() > $thumbs.width())
-					scroll = $current_thumb.offset().top - $thumbs.offset().top;
-				console.log($container.find('.mixSlide-thumbs span').eq(0).offset().top)
+				let d_from_first = Math.abs($current_thumb.offset().left - $('.mixSlide-thumb:eq(0)').offset().left),
+					scroll = d_from_first - $thumbs.offset().left + ($thumbs.width()/2) - 80;
+				if($thumbs.height() > $thumbs.width()){
+					d_from_first = Math.abs($current_thumb.offset().top - $('.mixSlide-thumb:eq(0)').offset().top);
+					scroll = d_from_first - $thumbs.offset().top + ($thumbs.height() / 2) - 80;
+				}
+				console.log(scroll)
 				$thumbs.animate(
 					{step:scroll},
 					{
-						duration:500,
+						duration:1000,
 						step:function(val){
 							if($thumbs.height() < $thumbs.width())
 								$thumbs.scrollLeft(val);
@@ -717,7 +720,6 @@ function chooseTransition()
 							position = i;
 						}
 					}
-					console.log(position);
 					if(position > -1){
 						let thumbs = $obj.mixSlideData("thumbs");
 						if(thumbs.active)
