@@ -118,7 +118,7 @@ function chooseTransition()
 			},
 			autoplay : false,
 			controls : true,
-			minimal_control:false,
+			minimal_controls:false,
 			thumbs : false,
 			labels:true
 		};
@@ -208,54 +208,66 @@ function chooseTransition()
 							<span class="mixSlide-open-close-fullscreen">'+MXS_CONTROLS_SQUARE_CODE+'</span>\
 						</div>';
 					$controls.append(controls_code);
+
+					if($obj.mixSlideData('animated'))
+						$controls.find('.mixSlide-start-slide').html(MXS_CONTROLS_PAUSE_CODE);
+					if(options.fullscreen){
+						$controls.find('.mixSlide-open-close-fullscreen').html(MXS_CONTROLS_CLOSE_CODE);
+						$obj.mixSlideData('fullscreen', true);
+					}else{
+						$obj.mixSlideData('fullscreen', false);
+					}
+					if(!options.thumbs){
+						let points_code = '<div class="mixSlide-points">';
+						for(let i = 0; i < images.length; i++){
+							points_code += '<span class="mixSlide-point"data-image-index="'+i+'"></span>';
+						}
+						points_code += "</div>";
+						$controls.append(points_code);
+						
+					}		
 				}else{
 					$controls.addClass("minimal");
-				}
-				if($obj.mixSlideData('animated'))
-					$controls.find('.mixSlide-start-slide').html(MXS_CONTROLS_PAUSE_CODE);
-				if(options.fullscreen){
-					$controls.find('.mixSlide-open-close-fullscreen').html(MXS_CONTROLS_CLOSE_CODE);
-					$obj.mixSlideData('fullscreen', true);
-				}else{
-					$obj.mixSlideData('fullscreen', false);
-				}
-				if(!options.thumbs){
-					let points_code = '<div class="mixSlide-points">';
-					for(let i = 0; i < images.length; i++){
-						points_code += '<span class="mixSlide-point"data-image-index="'+i+'"></span>';
-					}
-					points_code += "</div>";
-					$controls.append(points_code);
 					
-				}				
+					let points_code = '<div class="mixSlide-points">';
+						for(let i = 0; i < images.length; i++){
+							points_code += '<span class="mixSlide-point"data-image-index="'+i+'"></span>';
+						}
+						points_code += "</div>";
+						$controls.append(points_code);
+				}		
 			}
-
-			switch(options.layout)
-			{
-				case MXS_LAYOUT_1:
-					$controls.addClass("top-right");
-					$container.find('.mixSlide-thumbs').addClass("bottom");
-					$images.find('p').addClass("left");
-					if(options.thumbs) $images.find('p').addClass("top");
-					else $images.find('p').addClass("bottom");
-				break;
-				case MXS_LAYOUT_2:
-					$controls.addClass("bottom-right");
-					$container.find('.mixSlide-thumbs').addClass("top");
-					$images.find('p').addClass("left");
-					if(options.thumbs) $images.find('p').addClass("bottom");
-					else $images.find('p').addClass("top");
-				break;
-				case MXS_LAYOUT_3:
-					$controls.addClass("bottom-right");
-					$container.find('.mixSlide-thumbs').addClass("top-left");
-					$images.find('p').addClass("top-right");
-				break;
-				default:
-					$controls.addClass("top-left");
-					$container.find('.mixSlide-thumbs').addClass("top-right");
-					$images.find('p').addClass("bottom-left");
-				break;
+			if(!options.minimal_controls){
+				switch(options.layout)
+				{
+					case MXS_LAYOUT_1:
+						$controls.addClass("top-right");
+						$container.find('.mixSlide-thumbs').addClass("bottom");
+						$images.find('p').addClass("left");
+						if(options.thumbs) $images.find('p').addClass("top");
+						else $images.find('p').addClass("bottom");
+					break;
+					case MXS_LAYOUT_2:
+						$controls.addClass("bottom-right");
+						$container.find('.mixSlide-thumbs').addClass("top");
+						$images.find('p').addClass("left");
+						if(options.thumbs) $images.find('p').addClass("bottom");
+						else $images.find('p').addClass("top");
+					break;
+					case MXS_LAYOUT_3:
+						$controls.addClass("bottom-right");
+						$container.find('.mixSlide-thumbs').addClass("top-left");
+						$images.find('p').addClass("top-right");
+					break;
+					default:
+						$controls.addClass("top-left");
+						$container.find('.mixSlide-thumbs').addClass("top-right");
+						$images.find('p').addClass("bottom-left");
+					break;
+				}
+			}else{
+				$controls.addClass("bottom");
+				$images.find('p').addClass("top-left");
 			}
 
 			/*
@@ -626,27 +638,29 @@ function chooseTransition()
 					$thumbs = $container.find('.mixSlide-thumbs');
 				$controls.find('.mixSlide-points span').removeClass('active');
 				$container.find('.mixSlide-points span').eq(currentImageIndex).addClass('active');
-				$thumbs.find('span').removeClass('active');
-				$current_thumb.addClass('active');
-				let d_from_first = Math.abs($current_thumb.offset().left - $('.mixSlide-thumb:eq(0)').offset().left),
-					scroll = d_from_first - $thumbs.offset().left + ($thumbs.width()/2) - 80;
-				if($thumbs.height() > $thumbs.width()){
-					d_from_first = Math.abs($current_thumb.offset().top - $('.mixSlide-thumb:eq(0)').offset().top);
-					scroll = d_from_first - $thumbs.offset().top + ($thumbs.height() / 2) - 80;
-				}
-				console.log(scroll)
-				$thumbs.animate(
-					{step:scroll},
-					{
-						duration:1000,
-						step:function(val){
-							if($thumbs.height() < $thumbs.width())
-								$thumbs.scrollLeft(val);
-							else
-								$thumbs.scrollTop(val);
-						}
+				if(options.thumbs){
+					$thumbs.find('span').removeClass('active');
+					$current_thumb.addClass('active');
+					let d_from_first = Math.abs($current_thumb.offset().left - $('.mixSlide-thumb:eq(0)').offset().left),
+						scroll = d_from_first - $thumbs.offset().left + ($thumbs.width()/2) - 80;
+					if($thumbs.height() > $thumbs.width()){
+						d_from_first = Math.abs($current_thumb.offset().top - $('.mixSlide-thumb:eq(0)').offset().top);
+						scroll = d_from_first - $thumbs.offset().top + ($thumbs.height() / 2) - 80;
 					}
-				);
+					console.log(scroll)
+					$thumbs.animate(
+						{step:scroll},
+						{
+							duration:1000,
+							step:function(val){
+								if($thumbs.height() < $thumbs.width())
+									$thumbs.scrollLeft(val);
+								else
+									$thumbs.scrollTop(val);
+							}
+						}
+					);
+				}
 			}
 			refresh();
 			function animation()
